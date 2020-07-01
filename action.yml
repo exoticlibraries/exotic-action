@@ -1,0 +1,43 @@
+
+name: 'Exotic Action'
+description: 'Download exotic libraries into your C/C++ GitHub Action environment. Also, run regression testing with cester.'
+
+inputs:
+    
+  download-exotic-libraries: 
+    description: 'If false the exotic libraries will not be downloaded'
+    required: false
+    default: true
+    
+  test-compiler-options: 
+    description: 'Array of compiler options to add when compiling each test file'
+    required: false
+    default: |
+        '-pedantic'
+    
+  run-cester-regression: 
+    description: 'If false skip running the test files under test folders'
+    required: false
+    default: true
+    
+  cester-options: 
+    description: 'If false skip running the test files under test folders'
+    required: false
+    default: |
+        '--cester-noisolation'
+        '--cester-nomemtest'
+    
+  test-folders: 
+    description: 'Array of folders to run cester regression test in.'
+    required: false
+    default: |
+        'test/'
+        'tests/'
+    
+outputs:
+  tests-passed:
+    description: 'true if the cester regression test passed'
+    
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

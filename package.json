@@ -1,0 +1,24 @@
+{
+  "name": "exotic-action",
+  "version": "0.1.0",
+  "description": "Download exotic libraries into your C/C++ GitHub Action environment. Also, run regression testing with cester.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exoticlibraries/exotic-action.git"
+  },
+  "keywords": [],
+  "author": "Adewale Azeez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/exoticlibraries/exotic-action/issues"
+  },
+  "homepage": "https://exoticlibraries.github.io/exotic-action/",
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^4.0.0"
+  }
+}
