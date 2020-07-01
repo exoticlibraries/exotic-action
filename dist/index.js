@@ -6798,8 +6798,11 @@ try {
 
 function getAndSanitizeInputs(key, type, defaultValue) {
     var value = core.getInput(key);
-    if (!value) {
+    if (!value || value == "") {
         return defaultValue;
+    }
+    if (type === "boolean") {
+        return value.toUpperCase() === "TRUE" || value;
     }
     return value;
 }
