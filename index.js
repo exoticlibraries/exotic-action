@@ -14,7 +14,7 @@ try {
     
     console.log()
     console.log("Test System")
-    exec('ls /usr/include/', (err, stdout, stderr) => {
+    exec('mkdir -p /usr/include/exotic/; ls /usr/include/exotic/', (err, stdout, stderr) => {
       if (err) {
         return;
       }
