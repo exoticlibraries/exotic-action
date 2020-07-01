@@ -6837,7 +6837,7 @@ function downloadExoticLibraries() {
     
     console.log("libcester...")
     downloadSingleFile("cester.h", 
-                          "https://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h",
+                          "http://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h",
                           headerPath)
     
     return true;
