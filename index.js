@@ -66,11 +66,11 @@ function downloadExoticLibraries() {
     }
     
     // create the folders if they do not exists
-    if (!fs.existsSync(headerPath) || !fs.mkdirSync(headerPath)) {
+    if (!fs.existsSync(headerPath) || !fs.mkdirSync(headerPath, { recursive: true })) {
         console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
         return false;
     }
-    if (!fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
+    if (!fs.existsSync(libsPath) || !fs.existsSync(libsPath, { recursive: true })) {
         console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
         return false;
     }
