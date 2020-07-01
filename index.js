@@ -1,7 +1,7 @@
 
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { exec } = require('child_process');
+const { exec, spawnSync } = require('child_process');
 const http = require('http');
 const fs = require('fs');
 
@@ -66,9 +66,9 @@ function downloadExoticLibraries() {
         return false;
     }
     
-    // create the folders if they do not exists
+    
     console.log(headerPath)
-    if (!fs.existsSync(headerPath)) {
+    /*if (!fs.existsSync(headerPath)) {
         if (!fs.mkdirSync(headerPath, { recursive: true })) {
             console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
             return false;
@@ -78,7 +78,7 @@ function downloadExoticLibraries() {
     if (!fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
         console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
         return false;
-    }
+    }*/
     
     console.log("Downloading Exotic Libraries...")
     

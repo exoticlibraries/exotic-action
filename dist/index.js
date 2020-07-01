@@ -6754,7 +6754,7 @@ module.exports = function(fn) {
 
 const core = __webpack_require__(435);
 const github = __webpack_require__(342);
-const { exec } = __webpack_require__(129);
+const { exec, spawnSync } = __webpack_require__(129);
 const http = __webpack_require__(605);
 const fs = __webpack_require__(747);
 
@@ -6819,9 +6819,9 @@ function downloadExoticLibraries() {
         return false;
     }
     
-    // create the folders if they do not exists
+    
     console.log(headerPath)
-    if (!fs.existsSync(headerPath)) {
+    /*if (!fs.existsSync(headerPath)) {
         if (!fs.mkdirSync(headerPath, { recursive: true })) {
             console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
             return false;
@@ -6831,7 +6831,7 @@ function downloadExoticLibraries() {
     if (!fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
         console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
         return false;
-    }
+    }*/
     
     console.log("Downloading Exotic Libraries...")
     
