@@ -19,6 +19,7 @@
   "homepage": "https://exoticlibraries.github.io/exotic-action/",
   "dependencies": {
     "@actions/core": "^1.2.4",
+    "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0"
   }
 }

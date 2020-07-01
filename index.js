@@ -1,7 +1,7 @@
 
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { execSync, spawnSync } = require('child_process');
+const exec = require("@actions/exec");
 const http = require('http');
 const fs = require('fs');
 
@@ -67,7 +67,7 @@ function downloadExoticLibraries() {
     }
     
     
-    console.log(headerPath)
+    console.log(__dirname)
     /*if (!fs.existsSync(headerPath)) {
         if (!fs.mkdirSync(headerPath, { recursive: true })) {
             console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
@@ -82,8 +82,7 @@ function downloadExoticLibraries() {
     
     console.log("Downloading Exotic Libraries...")
     
-    var out = execSync("bash scripts/install.sh");
-    console.log(out);
+    await exec.exec("bash " + __dirname + "/scripts/install.sh");
     
     /*console.log("libcester...")
     downloadSingleFile("cester.h", 
