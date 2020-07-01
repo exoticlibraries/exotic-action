@@ -6754,7 +6754,7 @@ module.exports = function(fn) {
 
 const core = __webpack_require__(435);
 const github = __webpack_require__(342);
-const { exec, spawnSync } = __webpack_require__(129);
+const { execSync, spawnSync } = __webpack_require__(129);
 const http = __webpack_require__(605);
 const fs = __webpack_require__(747);
 

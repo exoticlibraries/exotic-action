@@ -1,7 +1,7 @@
 
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { exec, spawnSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const http = require('http');
 const fs = require('fs');
 
