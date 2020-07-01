@@ -56,47 +56,14 @@ function getAndSanitizeInputs(key, type, defaultValue) {
 }
 
 async function downloadExoticLibraries() {
-    var headerPath = "";
-    var libsPath = "";
+    console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux") {
-        headerPath = "/usr/include/exotic/"
-        libsPath = "/usr/lib/exotic/"
+        await exec.exec("bash " + __dirname + "/../scripts/install.sh");
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + "'")
         return false;
     }
-    
-    
-    console.log(__dirname)
-    /*if (!fs.existsSync(headerPath)) {
-        if (!fs.mkdirSync(headerPath, { recursive: true })) {
-            console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
-            return false;
-        }
-    }
-    console.log(libsPath)
-    if (!fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
-        console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
-        return false;
-    }*/
-    
-    console.log("Downloading Exotic Libraries...")
-    
-    await exec.exec("bash " + __dirname + "/../scripts/install.sh");
-    
-    /*console.log("libcester...")
-    downloadSingleFile("cester.h", 
-                          "http://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h",
-                          headerPath)*/
-    
     return true;
-}
-
-function downloadSingleFile(fileName, downloadPath, installationPath) {
-    const file = fs.createWriteStream(installationPath + "/" + fileName);
-    const request = http.get(downloadPath, function(response) {
-        response.pipe(file);
-    });
 }
 
 
