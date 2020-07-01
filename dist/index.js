@@ -6765,17 +6765,6 @@ try {
     const cesterOpts = getAndSanitizeInputs('cester-options', 'array', [ '--cester-noisolation', '--cester-nomemtest' ]);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     
-    console.log()
-    console.log("Test System")
-    exec('mkdir -p /usr/include/exotic/; ls /usr/include/exotic/', (err, stdout, stderr) => {
-      if (err) {
-        return;
-      }
-
-      console.log(`stdout: ${stdout}`);
-      console.log(`stderr: ${stderr}`);
-    });
-    console.log()
     if (downloadExLibs === true) {
         if (downloadExoticLibraries() === false) {
             throw new Error("Failed to download exotic libraries");
@@ -6786,6 +6775,17 @@ try {
     console.log(`Cester Options ${cesterOpts}`);
     console.log(`Test Folders ${testFolders}`);
     
+    /*console.log()
+    console.log("Test System")
+    exec('mkdir -p /usr/include/exotic/; ls /usr/include/exotic/', (err, stdout, stderr) => {
+      if (err) {
+        return;
+      }
+
+      console.log(`stdout: ${stdout}`);
+      console.log(`stderr: ${stderr}`);
+    });
+    console.log()*/
     
     
     // after
@@ -6835,10 +6835,19 @@ function downloadExoticLibraries() {
     
     console.log("Downloading Exotic Libraries...")
     
-    console.log("libcester...")
+    exec('bash <(curl -s https://exoticlibraries.github.io/libcester/cester.sh)', (err, stdout, stderr) => {
+      if (err) {
+        return;
+      }
+
+      console.log(`stdout: ${stdout}`);
+      console.log(`stderr: ${stderr}`);
+    });
+    
+    /*console.log("libcester...")
     downloadSingleFile("cester.h", 
                           "http://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h",
-                          headerPath)
+                          headerPath)*/
     
     return true;
 }
