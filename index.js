@@ -61,14 +61,17 @@ function downloadExoticLibraries() {
         headerPath = "/usr/include/exotic/"
         libsPath = "/usr/lib/exotic/"
     } else {
-        console.error("Exotic Action does not support the platform '" + process.platform + "'")
+        console.error("Exotic Action is not supported on this platform '" + process.platform + "'")
         return false;
     }
     
     // create the folders if they do not exists
-    if (!fs.existsSync(headerPath) || !fs.mkdirSync(headerPath) || 
-        !fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
-        console.error("Failed to create libraries folder please open an issue")
+    if (!fs.existsSync(headerPath) || !fs.mkdirSync(headerPath)) {
+        console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
+        return false;
+    }
+    if (!fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
+        console.error("Failed to create libraries folder please open an issue at https://github.com/exoticlibraries/exotic-action")
         return false;
     }
     
