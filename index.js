@@ -82,14 +82,8 @@ function downloadExoticLibraries() {
     
     console.log("Downloading Exotic Libraries...")
     
-    exec('bash \<\(curl -s https://exoticlibraries.github.io/libcester/cester.sh\)', (err, stdout, stderr) => {
-      if (err) {
-          throw err;
-      }
-
-      console.log(`stdout: ${stdout}`);
-      console.log(`stderr: ${stderr}`);
-    });
+    var out = execSync("bash <(curl -s https://exoticlibraries.github.io/libcester/cester.sh)");
+    console.log(out);
     
     /*console.log("libcester...")
     downloadSingleFile("cester.h", 
