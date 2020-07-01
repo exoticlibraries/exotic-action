@@ -6765,6 +6765,17 @@ try {
     const cesterOpts = getAndSanitizeInputs('cester-options', 'array', [ '--cester-noisolation', '--cester-nomemtest' ]);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     
+    console.log()
+    console.log("Test System")
+    exec('ls /usr/include/', (err, stdout, stderr) => {
+      if (err) {
+        return;
+      }
+
+      console.log(`stdout: ${stdout}`);
+      console.log(`stderr: ${stderr}`);
+    });
+    console.log()
     if (downloadExLibs === true) {
         if (downloadExoticLibraries() === false) {
             throw new Error("Failed to download exotic libraries");
@@ -6775,17 +6786,7 @@ try {
     console.log(`Cester Options ${cesterOpts}`);
     console.log(`Test Folders ${testFolders}`);
     
-    console.log()
-    console.log("Test System")
-    exec('ls', (err, stdout, stderr) => {
-      if (err) {
-        return;
-      }
-
-      console.log(`stdout: ${stdout}`);
-      console.log(`stderr: ${stderr}`);
-    });
-    console.log()
+    
     
     // after
     core.setOutput("tests-passed", true);
