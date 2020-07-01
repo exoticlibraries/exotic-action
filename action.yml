@@ -13,7 +13,7 @@ inputs:
     description: 'Array of compiler options to add when compiling each test file'
     required: false
     default: |
-        -pedantic
+        '-pedantic'
     
   run-cester-regression: 
     description: 'If false skip running the test files under test folders'
@@ -24,15 +24,15 @@ inputs:
     description: 'If false skip running the test files under test folders'
     required: false
     default: |
-        --cester-noisolation
-        --cester-nomemtest
+        '--cester-noisolation'
+        '--cester-nomemtest'
     
   test-folders: 
     description: 'Array of folders to run cester regression test in.'
     required: false
     default: |
-        test/
-        tests/
+        'test/'
+        'tests/'
     
 outputs:
   tests-passed:
