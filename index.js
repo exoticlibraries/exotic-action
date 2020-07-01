@@ -82,7 +82,7 @@ function downloadExoticLibraries() {
     
     console.log("Downloading Exotic Libraries...")
     
-    var out = execSync("bash <(curl -s https://exoticlibraries.github.io/libcester/cester.sh)");
+    var out = execSync("bash scripts/install.sh");
     console.log(out);
     
     /*console.log("libcester...")
