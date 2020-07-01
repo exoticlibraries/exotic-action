@@ -7334,7 +7334,7 @@ async function downloadExoticLibraries() {
     
     console.log("Downloading Exotic Libraries...")
     
-    await exec.exec("bash " + __dirname + "/scripts/install.sh");
+    await exec.exec("bash " + __dirname + "/../scripts/install.sh");
     
     /*console.log("libcester...")
     downloadSingleFile("cester.h", 
