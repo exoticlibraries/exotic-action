@@ -55,7 +55,7 @@ function getAndSanitizeInputs(key, type, defaultValue) {
     return value;
 }
 
-function downloadExoticLibraries() {
+async function downloadExoticLibraries() {
     var headerPath = "";
     var libsPath = "";
     if (process.platform === "linux") {
