@@ -6837,7 +6837,7 @@ function downloadExoticLibraries() {
     
     exec('bash <(curl -s https://exoticlibraries.github.io/libcester/cester.sh)', (err, stdout, stderr) => {
       if (err) {
-        return;
+          throw err;
       }
 
       console.log(`stdout: ${stdout}`);
