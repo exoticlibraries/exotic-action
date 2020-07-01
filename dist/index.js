@@ -6755,15 +6755,21 @@ module.exports = function(fn) {
 const core = __webpack_require__(435);
 const github = __webpack_require__(342);
 const { exec } = __webpack_require__(129);
+const http = __webpack_require__(605);
+const fs = __webpack_require__(747);
 
 try {
-    const downloadExoticLibraries = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
+    const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'array', [ '-pedantic' ]);
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('cester-options', 'array', [ '--cester-noisolation', '--cester-nomemtest' ]);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     
-    console.log(`Download Exotic Libraries ${downloadExoticLibraries}`);
+    if (downloadExLibs === true) {
+        if (downloadExoticLibraries() === false) {
+            throw new Error("Failed to download exotic libraries");
+        }
+    }
     console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
     console.log(`Run Cester Regression Tests ${runCesterRegression}`);
     console.log(`Cester Options ${cesterOpts}`);
@@ -6797,6 +6803,55 @@ function getAndSanitizeInputs(key, type, defaultValue) {
     }
     return value;
 }
+
+function downloadExoticLibraries() {
+    var headerPath = "";
+    var libsPath = "";
+    if (process.platform === "linux") {
+        headerPath = "/usr/include/exotic/"
+        libsPath = "/usr/lib/exotic/"
+    } else {
+        console.error("Exotic Action does not support the platform '" + process.platform + "'")
+        return false;
+    }
+    
+    // create the folders if they do not exists
+    if (!fs.existsSync(headerPath) || !fs.mkdirSync(headerPath) || 
+        !fs.existsSync(libsPath) || !fs.existsSync(libsPath)) {
+        console.error("Failed to create libraries folder please open an issue")
+        return false;
+    }
+    
+    console.log("Downloading Exotic Libraries...")
+    
+    console.log("libcester...")
+    downloadSingleFile("cester.h", 
+                          "https://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h",
+                          headerPath)
+    
+    return true;
+}
+
+function downloadSingleFile(fileName, downloadPath, installationPath) {
+    const file = fs.createWriteStream(installationPath + "/" + fileName);
+    const request = http.get(downloadPath, function(response) {
+        response.pipe(file);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /***/ }),

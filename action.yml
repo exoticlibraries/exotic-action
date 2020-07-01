@@ -25,7 +25,7 @@ inputs:
     required: false
     default: |
         --cester-noisolation
-        --cester-nomemtest'
+        --cester-nomemtest
     
   test-folders: 
     description: 'Array of folders to run cester regression test in.'
