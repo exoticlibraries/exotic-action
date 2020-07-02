@@ -68,19 +68,17 @@ function afterDownloadDeps() {
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
                 var compiler = selectCompilerExec(selectedCompiler, file);
-                var outputName = "out_"+index;
+                var outputName = "out_"+params.numberOfTests;
                 if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
                     outputName += ".exe";
                 }
                 console.log("Running test: " + fullPath);
-                console.log("Output name: " + outputName);
+                console.log("Output name2: " + outputName);
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
                     await exec.exec(`./${outputName} ${cesterOpts}`);
-                    exec.exec("rm " + outputName).then((result) => {
-                        console.log(result);
-                    }).catch((error) => {
+                    exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
                         console.error(error);
                     });
                     params.numberOfTestsRan++;
