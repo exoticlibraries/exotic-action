@@ -51,11 +51,12 @@ var path = require('path');
                         
                         var fullPath = path.join(folder, file);
                         var outputName = "out";
+                        var compiler = selectCompilerExec(selectedCompiler, file);
                         if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
                             outputName = "out.exe";
                         }
                         console.log("Running test: " + fullPath);
-                        var command = `${selectedCompiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
+                        var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
                         await exec.exec(command);
                     });
                 });
@@ -93,6 +94,15 @@ function getAndSanitizeInputs(key, type, defaultValue) {
 
 function strToArray(str, seperator) {
     return str.split(seperator);
+}
+
+function selectCompilerExec(selectedCompiler, file) {
+    if (selectedCompiler.startsWith("gnu")) {
+        return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
+    }
+    if (selectedCompiler.startsWith("clang")) {
+        return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+    }
 }
 
 function formatArch(selectedArch) {
