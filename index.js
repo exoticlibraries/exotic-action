@@ -7,13 +7,11 @@ const jsexec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 var path = require('path');
 
-(async function() {
-    main();
-})()
-async function main() {
+main();
+function main() {
     const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
     if (downloadExLibs === true) {
-        downloadExoticLibraries(function(completed) {
+        downloadExoticLibraries(async function(completed) {
             if (completed === true) {
                 await afterDownloadDeps();
             } else {
@@ -22,7 +20,9 @@ async function main() {
             }
         });
     } else {
-        await afterDownloadDeps();
+        (async function() {
+            await afterDownloadDeps();
+        })()
     }
 }
 
