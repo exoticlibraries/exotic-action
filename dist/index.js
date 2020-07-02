@@ -7274,7 +7274,7 @@ function main() {
     }
 }
 
-function afterDownloadDeps() {
+async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
@@ -7335,6 +7335,7 @@ function afterDownloadDeps() {
         for (i = 0; i < tests.length; i++) {
             console.log("Running test " +  i);
         }
+        const results = await Promise.all(tests);
             /*try {
                 await ;
             } catch (error) {

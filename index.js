@@ -22,7 +22,7 @@ function main() {
     }
 }
 
-function afterDownloadDeps() {
+async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
