@@ -75,18 +75,11 @@ function afterDownloadDeps() {
                 console.log("Running test: " + fullPath);
                 console.log("Output name2: " + outputName);
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
-                const options = {};
-                options.listeners = {
-                    stdout: (data) => {
-                        //console.log(data.toString());
-                    },
-                    stderr: (data) => {
-                        console.log(data.toString());
-                    }
-                };
                 try {
                     await exec.exec(command);
-                    await exec.exec(`./${outputName} ${cesterOpts}`, options);
+                    const { stdout, stderr } = await exec(`./${outputName} ${cesterOpts}`);
+                    console.log('stdout:', stdout);
+                    console.log('stderr:', stderr);
                     exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
                         console.error(error);
                     });
