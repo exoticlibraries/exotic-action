@@ -22,7 +22,7 @@ function main() {
     }
 }
 
-async function afterDownloadDeps() {
+function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
@@ -36,7 +36,6 @@ async function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
-    var tests = [];
     var outputName = "out";
     if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
         outputName = "out.exe";
@@ -75,22 +74,17 @@ async function afterDownloadDeps() {
                 var compiler = selectCompilerExec(selectedCompiler, file);
                 console.log("Running test: " + fullPath);
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                tests.push(exec.exec(command));
+                try {
+                    await exec.exec(command);
+                } catch (error) {
+                    console.error(error);
+                    params.numberOfFailedTests++;
+                    console.log("In " + params.numberOfFailedTests);
+                }
+                console.log("Done with " + file);
                 
             });
         });
-        var i;
-        for (i = 0; i < tests.length; i++) {
-            console.log("Running test " +  i);
-        }
-        const results = await Promise.all(tests);
-            /*try {
-                await ;
-            } catch (error) {
-                console.error(error);
-                params.numberOfFailedTests++;
-                console.log("In " + params.numberOfFailedTests);
-            }*/
         if (fs.existsSync(outputName)) {
             exec.exec("rm " + outputName).then((result) => {
                 console.log(result);
