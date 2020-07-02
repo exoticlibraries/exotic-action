@@ -7328,7 +7328,7 @@ function afterDownloadDeps() {
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
-                    await exec.exec("./${outputName} ${cesterOpts}");
+                    await exec.exec(`./${outputName} ${cesterOpts}`);
                     params.numberOfTestsRan++;
                 } catch (error) {
                     console.error(error);
