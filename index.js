@@ -40,7 +40,7 @@ function afterDownloadDeps() {
         numberOfTests: 0
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
-        testFolders.every(async function (folder, index) {
+        testFolders.every(function (folder, index) {
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
                 return false;
@@ -50,7 +50,7 @@ function afterDownloadDeps() {
               core.setFailed("Could not list the content of test folder: " + folder);
               return false;
             }
-            files.every(async function (file, index) {
+            files.every(function (file, index) {
                 var skip = true;
                 testFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
