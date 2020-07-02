@@ -7302,7 +7302,7 @@ var path = __webpack_require__(622);
                         
                         var fullPath = path.join(folder, file);
                         console.log("Running test: " + fullPath);
-                        console.log("The compiler: " + selectedCompiler)
+                        console.log("The compiler: " + selectedCompiler);
                         //await exec.exec()
                     });
                 });
@@ -7314,7 +7314,7 @@ var path = __webpack_require__(622);
         core.setOutput("tests-passed", true);
         // Get the JSON webhook payload for the event that triggered the workflow
         const payload = JSON.stringify(github.context.payload, undefined, 2)
-        console.log(`The event payload: ${payload}`);
+        //console.log(`The event payload: ${payload}`);
     } catch (error) {
         core.setFailed(error.message);
     }
