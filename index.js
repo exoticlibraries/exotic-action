@@ -83,6 +83,7 @@ function afterDownloadDeps() {
         for (i = 0; i < tests.length; i++) {
             console.log("Running test " +  i);
         }
+        const results = await Promise.all(tests);
             /*try {
                 await ;
             } catch (error) {
