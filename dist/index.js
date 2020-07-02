@@ -7285,6 +7285,7 @@ function afterDownloadDeps() {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     
     var params = {
+        numberOfTestsRan: 0,
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
