@@ -7284,24 +7284,19 @@ var path = __webpack_require__(622);
                     }
                     files.forEach(function (file, index) {
                         var skip = true;
-                        console.log("For: " + file)
                         testFilePatterns.forEach(function (pattern, index) {
-                            console.log("Pattern: "+pattern);
                             if (new RegExp(pattern).test(file)) {
                                 skip = false;
                                 return false;
                             }
                         });
-                        console.log("1: " + skip);
                         if (skip === true) { return; }
                         testExludeFilePatterns.forEach(function (pattern, index) {
-                            console.log("Exclude Pattern: "+pattern);
                             if (new RegExp(pattern).test(file)) {
                                 skip = true;
                                 return false;
                             }
                         });
-                        console.log("2: " + skip);
                         if (skip === true) { return; }
                         
                         var fullPath = path.join(folder, file);
@@ -7343,7 +7338,7 @@ function strToArray(str, seperator) {
 
 async function downloadExoticLibraries() {
     console.log("Downloading Exotic Libraries...")
-    if (process.platform === "linux") {
+    if (process.platform === "linux" || process.platform === "darwin") {
         await exec.exec("bash " + __dirname + "/../scripts/install.sh");
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + "'")
