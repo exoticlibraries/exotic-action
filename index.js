@@ -91,7 +91,6 @@ function afterDownloadDeps() {
                         });
                         params.numberOfTestsRan++;
                     } catch (error) {
-                        // I hope no slow down here
                         params.numberOfFailedTests++;
                         params.numberOfTestsRan++;
                         console.error(!error.stdout ? "" : error.stdout);
