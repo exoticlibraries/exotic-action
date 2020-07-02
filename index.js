@@ -35,7 +35,7 @@ var path = require('path');
                         console.log("For: " + file)
                         testFilePatterns.forEach(function (pattern, index) {
                             console.log("Pattern: "+pattern);
-                            if (!new RegExp(pattern, 'i').test(file)) {
+                            if (!new RegExp(pattern).test(file)) {
                                 skip = true;
                                 return false;
                             }
@@ -44,7 +44,7 @@ var path = require('path');
                         if (skip === true) { return; }
                         testExludeFilePatterns.forEach(function (pattern, index) {
                             console.log("Exclude Pattern: "+pattern);
-                            if (new RegExp(pattern, 'i').test(file)) {
+                            if (new RegExp(pattern).test(file)) {
                                 skip = true;
                                 return false;
                             }
@@ -58,22 +58,6 @@ var path = require('path');
                 });
             });
         }
-        //console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
-        //console.log(`Run Cester Regression Tests ${runCesterRegression}`);
-        //console.log(`Cester Options ${cesterOpts}`);
-        
-
-        /*console.log()
-        console.log("Test System")
-        exec('mkdir -p /usr/include/exotic/; ls /usr/include/exotic/', (err, stdout, stderr) => {
-          if (err) {
-            return;
-          }
-
-          console.log(`stdout: ${stdout}`);
-          console.log(`stderr: ${stderr}`);
-        });
-        console.log()*/
 
 
         // after
