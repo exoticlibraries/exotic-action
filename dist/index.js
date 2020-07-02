@@ -7330,13 +7330,11 @@ function afterDownloadDeps() {
                 try {
                     await exec.exec(command);
                     await exec.exec(`./${outputName} ${cesterOpts}`);
-                    if (fs.existsSync(outputName)) {
-                        exec.exec("rm " + outputName).then((result) => {
-                            console.log(result);
-                        }).catch((error) => {
-                            console.error(error);
-                        });
-                    }
+                    exec.exec("rm " + outputName).then((result) => {
+                        console.log(result);
+                    }).catch((error) => {
+                        console.error(error);
+                    });
                     params.numberOfTestsRan++;
                 } catch (error) {
                     console.error(error);
