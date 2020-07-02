@@ -7299,6 +7299,7 @@ function afterDownloadDeps() {
                 return false;
             }
             fs.readdir(folder, function (err, files) {
+                console.log(folder);
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
                   return;
