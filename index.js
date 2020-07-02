@@ -39,7 +39,6 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
-    console.log(testFolders);
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
         for (i = 0; i < testFolders.length; i++) {
@@ -49,7 +48,6 @@ function afterDownloadDeps() {
                 reportProgress(params);
                 return;
             }
-            console.log(folder);
             fs.readdir(folder, async function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
@@ -83,8 +81,8 @@ function afterDownloadDeps() {
                     var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                     try {
                         await exec.exec(command);
+                        //console.log("" + fullPath + " Test Result");
                         const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
-                        console.log("" + fullPath + " Test Result");
                         console.log(stdout);
                         console.log(stderr);
                         exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
@@ -96,13 +94,13 @@ function afterDownloadDeps() {
                         params.numberOfFailedTests++;
                         params.numberOfTestsRan++;
                         console.error(!error.stdout ? "" : error.stdout);
-                        console.log(error.stdout.toString().indexOf("test"))
+                        console.log("HAS TEST "+error.stdout.toString().indexOf("test"))
                         if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
                             console.error(error);
                         }                 
                         console.error(error);
                     }
-                    //reportProgress(params);
+                    reportProgress(params);
                 });
             });
         }
