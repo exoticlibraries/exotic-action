@@ -7328,9 +7328,9 @@ function afterDownloadDeps() {
                 }
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
-                    console.log("Running test: " + fullPath);
                     await exec.exec(command);
                     const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
+                    console.log("" + fullPath + " Test Result");
                     console.log(stdout);
                     console.log(stderr);
                     exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
