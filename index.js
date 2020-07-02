@@ -90,8 +90,8 @@ function afterDownloadDeps() {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
                     console.error(!error.stdout ? "" : error.stdout);
-                    console.log(error.stdout.toString().indexOf(substring))
-                    if (!error.stdout || error.stdout.toString().indexOf(substring) === -1) {
+                    console.log(error.stdout.toString().indexOf("test"))
+                    if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
                         console.error(error);
                     }                 
                     console.error(error);
