@@ -7273,7 +7273,17 @@ const fs = __webpack_require__(747);
         if (runCesterRegression === true) {
             console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
             testFolders.forEach(function (folder, index) {
-                console.log(folder, index);
+                if (!fs.existsSync(folder)) {
+                    throw new Error("The test folder does not exist: " + folder);
+                }
+                fs.readdir(folder, function (err, files) {
+                    if (err) {
+                      throw new Error("Could not list the content of test folder: " + folder);
+                    }
+                    files.forEach(function (file, index) {
+                        console.log(file);
+                    });
+                });
             });
         }
         //console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
