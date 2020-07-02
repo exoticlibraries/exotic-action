@@ -43,6 +43,7 @@ async function afterDownloadDeps() {
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
+        var j;
         for (i = 0; i < testFolders.length; i++) {
             var folder = testFolders[i];
             if (!fs.existsSync(folder)) {
@@ -57,9 +58,8 @@ async function afterDownloadDeps() {
               return;
             }
             console.log(folder);
-            var i;
-            for (i = 0; i < files.length; ++i) {
-                var file = files[i];
+            for (j = 0; j < files.length; ++j) {
+                var file = files[j];
                 var skip = true;
                 testFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
