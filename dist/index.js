@@ -7267,7 +7267,7 @@ var path = __webpack_require__(622);
         const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
         const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
         const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
-        const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
+        const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
 
         if (downloadExLibs === true) {
             if (await downloadExoticLibraries() === false) {
@@ -7302,9 +7302,13 @@ var path = __webpack_require__(622);
                         if (skip === true) { return; }
                         
                         var fullPath = path.join(folder, file);
+                        var outputName = "out";
                         console.log("Running test: " + fullPath);
                         console.log("The compiler: " + selectedCompiler);
                         console.log("The arch: " + selectedArch);
+                        //gcc test/test_no_assert.c -I. -o out; ./out
+                        var command = `${selectedCompiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
+                        console.log(command)
                         //await exec.exec()
                     });
                 });
@@ -7339,6 +7343,16 @@ function getAndSanitizeInputs(key, type, defaultValue) {
 
 function strToArray(str, seperator) {
     return str.split(seperator);
+}
+
+function formatArch(selectedArch) {
+    if (selectedArch == "x64") {
+        return "-m64";
+    } else if (selectedArch == "x86") {
+        return "-m32";
+    } else {
+        return "-march=" + selectedArch;
+    }
 }
 
 async function downloadExoticLibraries() {
