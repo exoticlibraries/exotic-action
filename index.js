@@ -36,32 +36,33 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
+    var failed = false;
     var outputName = "out";
     if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
         outputName = "out.exe";
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
         console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
-        testFolders.forEach(function (folder, index) {
+        testFolders.every(function (folder, index) {
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
-                return;
+                return false;
             }
             fs.readdir(folder, function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
                   return;
                 }
-                files.forEach(async function (file, index) {
+                files.every(async function (file, index) {
                     var skip = true;
-                    testFilePatterns.forEach(function (pattern, index) {
+                    testFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
                             skip = false;
                             return false;
                         }
                     });
                     if (skip === true) { return; }
-                    testExludeFilePatterns.forEach(function (pattern, index) {
+                    testExludeFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
                             skip = true;
                             return false;
