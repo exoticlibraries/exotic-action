@@ -67,14 +67,14 @@ async function afterDownloadDeps() {
                         return false;
                     }
                 });
-                if (skip === true) { return true; }
+                if (skip === true) { continue; }
                 testExludeFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
                         return false;
                     }
                 });
-                if (skip === true) { return true; }
+                if (skip === true) { continue; }
                 
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
@@ -113,7 +113,7 @@ async function afterDownloadDeps() {
     the result after all the test in each folder 
     has been executed and for some reason 
     the js asyn/await is not blocking the 
-    thread as it should. So I report each progress.
+    thread as i want. So I report each progress.
 */
 function reportProgress(params) {
     if (params.numberOfTestsRan === params.numberOfTests) {
