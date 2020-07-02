@@ -13,18 +13,18 @@ function main() {
     if (downloadExLibs === true) {
         downloadExoticLibraries(function(completed) {
             if (completed === true) {
-                afterDownloadDeps();
+                await afterDownloadDeps();
             } else {
                 core.setFailed("Failed to download exotic libraries");
                 return;
             }
         });
     } else {
-        afterDownloadDeps();
+        await afterDownloadDeps();
     }
 }
 
-function afterDownloadDeps() {
+async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
@@ -59,7 +59,7 @@ function afterDownloadDeps() {
             for (i = 0; i < files.length; ++i) {
                 var file = files[i];
                 var skip = true;
-                testFilePatterns.every(async function (pattern, index) {
+                testFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
                         skip = false;
                         return false;
