@@ -150,7 +150,7 @@ function downloadExoticLibraries() {
         console.log(result);
     }).catch((error) => {
         console.error(error);
-        return false;
+        throw new Error("Failed to download exotic libraries");
     });
     return true;
 }
