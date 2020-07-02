@@ -91,6 +91,7 @@ function afterDownloadDeps() {
         }
 
         // after
+        console.log("After All: " + numberOfFailedTests);
         if (numberOfFailedTests !== 0) {
             throw new Error("Regression test fails. Check the log above for details");
         }
