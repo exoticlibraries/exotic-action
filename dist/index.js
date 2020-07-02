@@ -7297,7 +7297,7 @@ function afterDownloadDeps() {
                 if (err) {
                   throw new Error("Could not list the content of test folder: " + folder);
                 }
-                files.forEach(function (file, index) {
+                files.forEach(async function (file, index) {
                     var skip = true;
                     testFilePatterns.forEach(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
@@ -7323,14 +7323,14 @@ function afterDownloadDeps() {
                     }
                     console.log("Running test: " + fullPath);
                     var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                    exec.exec(command).then((result) => {
+                    await exec.exec(command).then((result) => {
                         console.log(result);
                     }).catch((error) => {
                         params.numberOfFailedTests++;
                         console.error(error);
                     });
                     if (fs.existsSync(outputName)) {
-                        exec.exec("rm " + outputName).then((result) => {
+                        await exec.exec("rm " + outputName).then((result) => {
                             console.log(result);
                         }).catch((error) => {
                             console.error(error);
@@ -7338,8 +7338,8 @@ function afterDownloadDeps() {
                     }
                 });
             });
-            afterAll(params);
         });
+        afterAll(params);
     }
 }
 
