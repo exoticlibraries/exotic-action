@@ -15,13 +15,14 @@ var path = require('path');
         const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
         const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
         const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
+        const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
 
         if (downloadExLibs === true) {
             if (await downloadExoticLibraries() === false) {
                 throw new Error("Failed to download exotic libraries");
             }
         }
-        if (runCesterRegression === true && selectedCompiler !== "") {
+        if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
             console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
             testFolders.forEach(function (folder, index) {
                 if (!fs.existsSync(folder)) {
@@ -51,6 +52,7 @@ var path = require('path');
                         var fullPath = path.join(folder, file);
                         console.log("Running test: " + fullPath);
                         console.log("The compiler: " + selectedCompiler);
+                        console.log("The arch: " + selectedArch);
                         //await exec.exec()
                     });
                 });

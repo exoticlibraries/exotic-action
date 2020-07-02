@@ -52,6 +52,11 @@ inputs:
     required: false
     default: ${{ matrix.compiler }}
     
+  the-matrix-arch-internal-use-only: 
+    description: 'The current architecture this workflow is taking place. Note: do not change the value in workflow yml.'
+    required: false
+    default: ${{ matrix.platform }}
+    
 outputs:
   tests-passed:
     description: 'true if the cester regression test passed'
