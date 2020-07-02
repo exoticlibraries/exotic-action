@@ -110,7 +110,7 @@ function reportProgress(params) {
 
 function afterAll(params) {
     try {
-        if (params.numberOfFailedTests !== 0) {
+        if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
             throw new Error("Regression test fails. Check the log above for details");
         }
         core.setOutput("tests-passed", (params.numberOfFailedTests === 0));
