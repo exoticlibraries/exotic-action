@@ -7291,6 +7291,7 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
+    console.log(testFolders);
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         testFolders.every(function (folder, index) {
             if (!fs.existsSync(folder)) {
@@ -7302,6 +7303,7 @@ function afterDownloadDeps() {
               core.setFailed("Could not list the content of test folder: " + folder);
               return false;
             }
+            console.log(folder);
             files.every(async function (file, index) {
                 var skip = true;
                 testFilePatterns.every(function (pattern, index) {
@@ -7348,9 +7350,9 @@ function afterDownloadDeps() {
                     }                 
                     console.error(error);
                 }
+                reportProgress(params);
             });
         });
-        reportProgress(params);
     }
 }
 
@@ -7363,6 +7365,7 @@ function afterDownloadDeps() {
 */
 function reportProgress(params) {
     if (params.numberOfTestsRan === params.numberOfTests) {
+        console.log(params);
         afterAll(params);
     }
 }
