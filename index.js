@@ -2,6 +2,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require("@actions/exec");
+const util = require('util');
 const jsexec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 var path = require('path');
