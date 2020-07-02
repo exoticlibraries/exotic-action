@@ -7294,7 +7294,7 @@ function afterDownloadDeps() {
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
         console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
-        testFolders.every(function (folder, index) {
+        testFolders.every(async function (folder, index) {
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
                 return false;
@@ -7304,7 +7304,9 @@ function afterDownloadDeps() {
               core.setFailed("Could not list the content of test folder: " + folder);
               return false;
             }
-            files.every(async function (file, index) {
+            var i;
+            for (i = 0; i < files.length; i++) {
+                var file = files[i];
                 var skip = true;
                 testFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
@@ -7328,14 +7330,12 @@ function afterDownloadDeps() {
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
                 try {
                     await exec.exec(command);
-                    console.log("done with " + file);
                 } catch (error) {
                     console.error(error);
                     params.numberOfFailedTests++;
                     console.log("In " + params.numberOfFailedTests);
                 }
-                
-            });
+            }
         });
         if (fs.existsSync(outputName)) {
             exec.exec("rm " + outputName).then((result) => {
