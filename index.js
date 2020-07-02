@@ -21,7 +21,7 @@ const fs = require('fs');
         //console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
         //console.log(`Run Cester Regression Tests ${runCesterRegression}`);
         //console.log(`Cester Options ${cesterOpts}`);
-        console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
+        console.log(`Test Folders ${testFolders} ~~ ` + (testFolders.includes("\n")) + " ~~ " + (testFolders.includes(" ")));
 
         /*console.log()
         console.log("Test System")
