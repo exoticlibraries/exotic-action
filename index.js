@@ -37,10 +37,6 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
-    var outputName = "out";
-    if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
-        outputName = "out.exe";
-    }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         testFolders.every(async function (folder, index) {
             if (!fs.existsSync(folder)) {
@@ -72,11 +68,22 @@ function afterDownloadDeps() {
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
                 var compiler = selectCompilerExec(selectedCompiler, file);
+                var outputName = "out"+params.numberOfTests;
+                if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+                    outputName += ".exe";
+                }
                 console.log("Running test: " + fullPath);
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
                     await exec.exec(`./${outputName} ${cesterOpts}`);
+                    if (fs.existsSync(outputName)) {
+                        exec.exec("rm " + outputName).then((result) => {
+                            console.log(result);
+                        }).catch((error) => {
+                            console.error(error);
+                        });
+                    }
                     params.numberOfTestsRan++;
                 } catch (error) {
                     console.error(error);
@@ -86,13 +93,6 @@ function afterDownloadDeps() {
                 reportProgress(params);
             });
         });
-        if (fs.existsSync(outputName)) {
-            exec.exec("rm " + outputName).then((result) => {
-                console.log(result);
-            }).catch((error) => {
-                console.error(error);
-            });
-        }
     }
 }
 
