@@ -30,9 +30,7 @@ inputs:
   test-folders: 
     description: 'Array of folders to run cester regression test in.'
     required: false
-    default: |
-        test/
-        tests/
+    default: [test/, tests/]        
     
 outputs:
   tests-passed:

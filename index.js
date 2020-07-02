@@ -13,13 +13,13 @@ try {
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     
     if (downloadExLibs === true) {
-        if (downloadExoticLibraries() === false) {
+        if (await downloadExoticLibraries() === false) {
             throw new Error("Failed to download exotic libraries");
         }
     }
-    console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
-    console.log(`Run Cester Regression Tests ${runCesterRegression}`);
-    console.log(`Cester Options ${cesterOpts}`);
+    //console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
+    //console.log(`Run Cester Regression Tests ${runCesterRegression}`);
+    //console.log(`Cester Options ${cesterOpts}`);
     console.log(`Test Folders ${testFolders}`);
     
     /*console.log()
