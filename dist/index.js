@@ -7320,7 +7320,7 @@ function afterDownloadDeps() {
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
                 var compiler = selectCompilerExec(selectedCompiler, file);
-                var outputName = "out_"+params.numberOfTests;
+                var outputName = file.replace(/\.[^/.]+$/, "");
                 if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
                     outputName += ".exe";
                 }
