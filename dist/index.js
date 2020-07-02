@@ -7300,7 +7300,8 @@ var path = __webpack_require__(622);
                         if (skip === true) { return; }
                         
                         var fullPath = path.join(folder, file);
-                        console.log(fullPath);
+                        console.log("Running test: " + fullPath);
+                        //await exec.exec()
                     });
                 });
             });
@@ -7310,8 +7311,8 @@ var path = __webpack_require__(622);
         // after
         core.setOutput("tests-passed", true);
         // Get the JSON webhook payload for the event that triggered the workflow
-        //const payload = JSON.stringify(github.context.payload, undefined, 2)
-        //console.log(`The event payload: ${payload}`);
+        const payload = JSON.stringify(github.context.payload, undefined, 2)
+        console.log(`The event payload: ${payload}`);
     } catch (error) {
         core.setFailed(error.message);
     }
@@ -7339,7 +7340,6 @@ function strToArray(str, seperator) {
 async function downloadExoticLibraries() {
     console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux" || process.platform === "darwin") {
-        console.log("bash " + __dirname + "/../scripts/install.sh " + process.platform)
         await exec.exec("bash " + __dirname + "/../scripts/install.sh " + process.platform);
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + "'")

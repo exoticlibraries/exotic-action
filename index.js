@@ -49,7 +49,7 @@ var path = require('path');
                         
                         var fullPath = path.join(folder, file);
                         console.log("Running test: " + fullPath);
-                        await exec.exec()
+                        //await exec.exec()
                     });
                 });
             });
