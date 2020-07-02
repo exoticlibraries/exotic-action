@@ -87,6 +87,7 @@ function afterDownloadDeps() {
                     });
                     params.numberOfTestsRan++;
                 } catch (error) {
+                    console.error(error.stdout);
                     console.error(error);
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
