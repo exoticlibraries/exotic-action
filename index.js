@@ -196,6 +196,10 @@ function downloadExoticLibraries(callback) {
     console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux" || process.platform === "darwin") {
         command = "bash " + __dirname + "/../scripts/install.sh " + process.platform + " " + selectedArch;
+        
+    } else if (process.platform === "win32") {
+        command = "powershell " + __dirname + "/../scripts/install.ps1 " + process.platform + " " + selectedArch;
+        
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
         callback(false);
