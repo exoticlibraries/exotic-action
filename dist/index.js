@@ -7257,9 +7257,26 @@ const exec = __webpack_require__(842);
 const fs = __webpack_require__(747);
 var path = __webpack_require__(622);
 
-(async function() {
+try {
+    const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
+
+    if (downloadExLibs === true) {
+        downloadExoticLibraries(function(completed) {
+            if (completed === true) {
+                afterDownloadDeps();
+            } else {
+                throw new Error("Failed to download exotic libraries");
+            }
+        });
+    } else {
+        afterDownloadDeps();
+    }
+} catch (error) {
+    core.setFailed(error.message);
+}
+
+function afterDownloadDeps() {
     try {
-        const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
         const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
         const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
         const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
@@ -7271,12 +7288,6 @@ var path = __webpack_require__(622);
         
         var numberOfFailedTests = 0;
         var numberOfTests = 0;
-
-        if (downloadExLibs === true) {
-            if (downloadExoticLibraries() === false) {
-                throw new Error("Failed to download exotic libraries");
-            }
-        }
         if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
             console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
             testFolders.forEach(function (folder, index) {
@@ -7346,7 +7357,7 @@ var path = __webpack_require__(622);
     } catch (error) {
         core.setFailed(error.message);
     }
-})()
+}
 
 
 function getAndSanitizeInputs(key, type, defaultValue) {
@@ -7389,22 +7400,23 @@ function formatArch(selectedArch) {
     }
 }
 
-function downloadExoticLibraries() {
+function downloadExoticLibraries(callback) {
     console.log("Downloading Exotic Libraries...")
     var command = "";
     if (process.platform === "linux" || process.platform === "darwin") {
         command = "bash " + __dirname + "/../scripts/install.sh " + process.platform;
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + "'")
-        return false;
+        callback(false);
+        return;
     }
     exec.exec(command).then((result) => {
         console.log(result);
+        callback(true);
     }).catch((error) => {
         console.error(error);
-        throw new Error("Failed to download exotic libraries");
+        callback(false);
     });
-    return true;
 }
 
 
