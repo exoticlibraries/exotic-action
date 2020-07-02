@@ -50,7 +50,7 @@ function afterDownloadDeps() {
               core.setFailed("Could not list the content of test folder: " + folder);
               return false;
             }
-            files.every(function (file, index) {
+            files.every(async function (file, index) {
                 var skip = true;
                 testFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {

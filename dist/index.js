@@ -7292,7 +7292,7 @@ function afterDownloadDeps() {
         numberOfTests: 0
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
-        testFolders.every(async function (folder, index) {
+        testFolders.every(function (folder, index) {
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
                 return false;
