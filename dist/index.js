@@ -7287,6 +7287,10 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
+    var outputName = "out";
+    if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+        outputName = "out.exe";
+    }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
         console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
         testFolders.forEach(function (folder, index) {
@@ -7316,29 +7320,26 @@ function afterDownloadDeps() {
                     
                     params.numberOfTests++;
                     var fullPath = path.join(folder, file);
-                    var outputName = "out";
                     var compiler = selectCompilerExec(selectedCompiler, file);
-                    if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
-                        outputName = "out.exe";
-                    }
                     console.log("Running test: " + fullPath);
                     var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                    await exec.exec(command).then((result) => {
-                        console.log(result);
-                    }).catch((error) => {
-                        params.numberOfFailedTests++;
+                    try {
+                        await exec.exec(command);
+                    } catch (error) {
                         console.error(error);
-                    });
-                    if (fs.existsSync(outputName)) {
-                        await exec.exec("rm " + outputName).then((result) => {
-                            console.log(result);
-                        }).catch((error) => {
-                            console.error(error);
-                        });
+                        params.numberOfFailedTests++;
                     }
+                    
                 });
             });
         });
+        if (fs.existsSync(outputName)) {
+            exec.exec("rm " + outputName).then((result) => {
+                console.log(result);
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
         afterAll(params);
     }
 }
