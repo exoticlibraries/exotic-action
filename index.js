@@ -41,8 +41,7 @@ function afterDownloadDeps() {
     if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
         outputName = "out.exe";
     }
-    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
-        console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
+    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         testFolders.every(async function (folder, index) {
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
@@ -82,7 +81,6 @@ function afterDownloadDeps() {
                     console.error(error);
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
-                    console.log("In " + params.numberOfFailedTests);
                 }
                 reportProgress(params);
             });
@@ -181,8 +179,11 @@ function downloadExoticLibraries(callback) {
         return;
     }
     exec.exec(command).then((result) => {
-        console.log(result);
-        callback(true);
+        if (result === 0) {
+            callback(true);
+        } else {
+            callback(false);
+        }
     }).catch((error) => {
         console.error(error);
         callback(false);
