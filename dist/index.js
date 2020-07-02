@@ -7320,11 +7320,12 @@ function afterDownloadDeps() {
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
                 var compiler = selectCompilerExec(selectedCompiler, file);
-                var outputName = "out"+params.numberOfTests;
+                var outputName = "out_"+index;
                 if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
                     outputName += ".exe";
                 }
                 console.log("Running test: " + fullPath);
+                console.log("Output name: " + outputName);
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
