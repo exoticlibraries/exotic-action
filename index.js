@@ -55,7 +55,7 @@ function afterDownloadDeps() {
                   reportProgress(params);
                   return;
                 }
-                files.every(function (file, index) {
+                files.every(await async function (file, index) {
                     var skip = true;
                     testFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
