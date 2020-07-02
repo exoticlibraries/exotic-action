@@ -92,11 +92,11 @@ async function afterDownloadDeps() {
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
                     console.log(stdout); console.log(stderr);
                     params.numberOfTestsRan++;
-                    params.regressionOutput += 'PASSED ${outputName}\n';
+                    params.regressionOutput += `PASSED ${outputName}\n`;
                 } catch (error) {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
-                    params.regressionOutput += 'FAILED ${outputName}\n';
+                    params.regressionOutput += `FAILED ${outputName}\n`;
                     console.error(!error.stdout ? "" : error.stdout);
                     if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
                         console.error(error);
@@ -128,8 +128,8 @@ function afterAll(params) {
         core.setOutput("failed-tests-count", params.numberOfFailedTests);
         core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);        
         if (runCesterRegression === true) {
-            console.log()
             var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
+            console.log("Regression Result:")
             console.log(params.regressionOutput);
             console.error(`${percentagePassed}% tests passed, ${params.numberOfFailedTests} tests failed out of ${params.numberOfTests}`);
             if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
