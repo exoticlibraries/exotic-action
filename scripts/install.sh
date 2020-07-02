@@ -4,8 +4,7 @@ HEADER_PATH=/usr/include
 if [ "$1" = "darwin" ]; then
     HEADER_PATH=/usr/local/include
 fi
-echo "Secong Arg: $2"
-if [ "$2" = "x86" ]; then
+if [ "$2" = "-m32" ]; then
     sudo apt-get install gcc-multilib -y
 fi    
 wget -O cester.h https://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h
