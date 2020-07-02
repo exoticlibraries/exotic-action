@@ -39,7 +39,8 @@ async function afterDownloadDeps() {
     var params = {
         numberOfTestsRan: 0,
         numberOfFailedTests: 0,
-        numberOfTests: 0
+        numberOfTests: 0,
+        regressionOutput: ""
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
@@ -91,9 +92,11 @@ async function afterDownloadDeps() {
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
                     console.log(stdout); console.log(stderr);
                     params.numberOfTestsRan++;
+                    params.regressionOutput += 'PASSED ${outputName}\n';
                 } catch (error) {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
+                    params.regressionOutput += 'FAILED ${outputName}\n';
                     console.error(!error.stdout ? "" : error.stdout);
                     if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
                         console.error(error);
@@ -127,8 +130,8 @@ function afterAll(params) {
         if (runCesterRegression === true) {
             console.log()
             var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
-            console.error(`${percentagePassed} tests passed, ${params.numberOfTests} tests failed out of ${params.numberOfTests}`);
-            console.log()
+            console.log(params.regressionOutput);
+            console.error(`${percentagePassed}% tests passed, ${params.numberOfFailedTests} tests failed out of ${params.numberOfTests}`);
             if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
                 throw new Error("Regression test fails. Check the log above for details");
             }
