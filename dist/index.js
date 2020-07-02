@@ -7254,6 +7254,7 @@ module.exports = function(fn) {
 const core = __webpack_require__(435);
 const github = __webpack_require__(342);
 const exec = __webpack_require__(842);
+const jsexec = util.promisify(__webpack_require__(129).exec);
 const fs = __webpack_require__(747);
 var path = __webpack_require__(622);
 
@@ -7329,7 +7330,7 @@ function afterDownloadDeps() {
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
-                    const { stdout, stderr } = await exec(`./${outputName} ${cesterOpts}`);
+                    const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
                     console.log('stdout:', stdout);
                     console.log('stderr:', stderr);
                     exec.exec("rm " + outputName).then((result) => { }).catch((error) => {

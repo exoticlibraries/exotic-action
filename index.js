@@ -2,6 +2,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require("@actions/exec");
+const jsexec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 var path = require('path');
 
@@ -77,7 +78,7 @@ function afterDownloadDeps() {
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
-                    const { stdout, stderr } = await exec(`./${outputName} ${cesterOpts}`);
+                    const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
                     console.log('stdout:', stdout);
                     console.log('stderr:', stderr);
                     exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
