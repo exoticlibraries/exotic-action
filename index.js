@@ -32,8 +32,8 @@ function afterDownloadDeps() {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     
     var params = {
-        numberOfFailedTests = 0,
-        numberOfTests = 0
+        numberOfFailedTests: 0,
+        numberOfTests: 0
     }
     var 
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
