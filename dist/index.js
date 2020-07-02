@@ -7290,14 +7290,14 @@ var path = __webpack_require__(622);
                                 return false;
                             }
                         });
-                        if (skip === true) { return true; }
+                        if (skip === true) { return; }
                         testExludeFilePatterns.forEach(function (pattern, index) {
                             if (new RegExp(pattern, 'i').test(file)) {
                                 skip = true;
                                 return false;
                             }
                         });
-                        if (skip === true) { return true; }
+                        if (skip === true) { return; }
                         
                         var fullPath = path.join(folder, file);
                         console.log(fullPath);
