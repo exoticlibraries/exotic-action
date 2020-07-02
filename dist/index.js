@@ -7305,7 +7305,6 @@ function afterDownloadDeps() {
                   return;
                 }
                 files.every(async function (file, index) {
-                    console.log(folder);
                     var skip = true;
                     testFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
@@ -7351,7 +7350,7 @@ function afterDownloadDeps() {
                         }                 
                         console.error(error);
                     }
-                    reportProgress(params);
+                    //reportProgress(params);
                 });
             });
         });
