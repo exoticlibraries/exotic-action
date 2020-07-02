@@ -7334,7 +7334,7 @@ function afterDownloadDeps() {
                     console.log("In " + params.numberOfFailedTests);
                 }
                 console.log("Done with " + file);
-                
+                reportProgress(params);
             });
         });
         if (fs.existsSync(outputName)) {
@@ -7346,6 +7346,17 @@ function afterDownloadDeps() {
         }
         afterAll(params);
     }
+}
+
+/**
+    This is here because I need to report 
+    the result after all the test in each folder 
+    has been executed and for some reason 
+    the js asyn/await is not blocking the 
+    thread as it should. So I report each progress.
+*/
+function reportProgress(params) {
+    console.log(params);
 }
 
 function afterAll(params) {
