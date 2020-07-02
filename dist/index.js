@@ -7312,14 +7312,14 @@ function afterDownloadDeps() {
                         return false;
                     }
                 });
-                if (skip === true) { return false; }
+                if (skip === true) { return true; }
                 testExludeFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
                         return false;
                     }
                 });
-                if (skip === true) { return false; }
+                if (skip === true) { return true; }
                 
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
@@ -7328,6 +7328,7 @@ function afterDownloadDeps() {
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
                 try {
                     await exec.exec(command);
+                    console.log("done with " + file);
                 } catch (error) {
                     console.error(error);
                     params.numberOfFailedTests++;
