@@ -46,59 +46,60 @@ function afterDownloadDeps() {
                 core.setFailed("The test folder does not exist: " + folder);
                 return false;
             }
-            var files  = fs.readdirSync(folder);
-            if (!files) {
-              core.setFailed("Could not list the content of test folder: " + folder);
-              return false;
-            }
-            console.log(folder);
-            files.every(async function (file, index) {
-                var skip = true;
-                testFilePatterns.every(function (pattern, index) {
-                    if (new RegExp(pattern).test(file)) {
-                        skip = false;
-                        return false;
-                    }
-                });
-                if (skip === true) { return true; }
-                testExludeFilePatterns.every(function (pattern, index) {
-                    if (new RegExp(pattern).test(file)) {
-                        skip = true;
-                        return false;
-                    }
-                });
-                if (skip === true) { return true; }
-                
-                params.numberOfTests++;
-                var fullPath = path.join(folder, file);
-                var compiler = selectCompilerExec(selectedCompiler, file);
-                var outputName = file.replace(/\.[^/.]+$/, "");
-                if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
-                    outputName += ".exe";
+            fs.readdir(folder, function (err, files) {
+                if (err) {
+                  core.setFailed("Could not list the content of test folder: " + folder);
+                  return;
                 }
-                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
-                try {
-                    await exec.exec(command);
-                    const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
-                    console.log("" + fullPath + " Test Result");
-                    console.log(stdout);
-                    console.log(stderr);
-                    exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
-                        console.error(error);
+                files.every(async function (file, index) {
+                    console.log(folder);
+                    var skip = true;
+                    testFilePatterns.every(function (pattern, index) {
+                        if (new RegExp(pattern).test(file)) {
+                            skip = false;
+                            return false;
+                        }
                     });
-                    params.numberOfTestsRan++;
-                } catch (error) {
-                    // I hope no slow down here
-                    params.numberOfFailedTests++;
-                    params.numberOfTestsRan++;
-                    console.error(!error.stdout ? "" : error.stdout);
-                    console.log(error.stdout.toString().indexOf("test"))
-                    if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
+                    if (skip === true) { return true; }
+                    testExludeFilePatterns.every(function (pattern, index) {
+                        if (new RegExp(pattern).test(file)) {
+                            skip = true;
+                            return false;
+                        }
+                    });
+                    if (skip === true) { return true; }
+                    
+                    params.numberOfTests++;
+                    var fullPath = path.join(folder, file);
+                    var compiler = selectCompilerExec(selectedCompiler, file);
+                    var outputName = file.replace(/\.[^/.]+$/, "");
+                    if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+                        outputName += ".exe";
+                    }
+                    var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
+                    try {
+                        await exec.exec(command);
+                        const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
+                        console.log("" + fullPath + " Test Result");
+                        console.log(stdout);
+                        console.log(stderr);
+                        exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
+                            console.error(error);
+                        });
+                        params.numberOfTestsRan++;
+                    } catch (error) {
+                        // I hope no slow down here
+                        params.numberOfFailedTests++;
+                        params.numberOfTestsRan++;
+                        console.error(!error.stdout ? "" : error.stdout);
+                        console.log(error.stdout.toString().indexOf("test"))
+                        if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
+                            console.error(error);
+                        }                 
                         console.error(error);
-                    }                 
-                    console.error(error);
-                }
-                reportProgress(params);
+                    }
+                    reportProgress(params);
+                });
             });
         });
     }
