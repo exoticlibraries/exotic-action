@@ -7293,15 +7293,19 @@ function afterDownloadDeps() {
     }
     console.log(testFolders);
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
-        testFolders.every(function (folder, index) {
+        var i;
+        for (i = 0; i < testFolders.length; i++) {
+            var folder = testFolders[i];
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
-                return false;
+                reportProgress(params);
+                return;
             }
             console.log(folder);
             fs.readdir(folder, async function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
+                  reportProgress(params);
                   return;
                 }
                 files.every(async function (file, index) {
@@ -7353,7 +7357,7 @@ function afterDownloadDeps() {
                     //reportProgress(params);
                 });
             });
-        });
+        }
     }
 }
 
