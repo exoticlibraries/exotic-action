@@ -18,10 +18,16 @@ const fs = require('fs');
                 throw new Error("Failed to download exotic libraries");
             }
         }
+        if (runCesterRegression === true) {
+            console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
+            testFolders.forEach(function (folder, index) {
+                console.log(folder, index);
+            });
+        }
         //console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
         //console.log(`Run Cester Regression Tests ${runCesterRegression}`);
         //console.log(`Cester Options ${cesterOpts}`);
-        console.log(`Test Folders ${testFolders} ~~ ` + (testFolders.includes("\n")) + " ~~ " + (testFolders.includes(" ")));
+        
 
         /*console.log()
         console.log("Test System")
@@ -55,7 +61,14 @@ function getAndSanitizeInputs(key, type, defaultValue) {
     if (type === "boolean") {
         return value.toUpperCase() === "TRUE" || value;
     }
+    if (type === "array" && (typeof value == "string")) {
+        return strToArray(value, '\n');
+    }
     return value;
+}
+
+function strToArray(str, seperator) {
+    return str.split(seperator);
 }
 
 async function downloadExoticLibraries() {
