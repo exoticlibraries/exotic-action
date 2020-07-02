@@ -7307,7 +7307,9 @@ function afterDownloadDeps() {
                   reportProgress(params);
                   return;
                 }
-                files.every(await async function (file, index) {
+                var i;
+                for (i = 0; i < files.length; ++i) {
+                    var file = files[i];
                     var skip = true;
                     testFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
@@ -7351,7 +7353,7 @@ function afterDownloadDeps() {
                         }
                     }
                     reportProgress(params);
-                });
+                }
             });
         }
     }
