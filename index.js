@@ -55,6 +55,8 @@ function afterDownloadDeps() {
             var i;
             for (i = 0; i < files.length; i++) {
                 var file = files[i];
+            }
+            files.every(async function (file, index) {
                 var skip = true;
                 testFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
@@ -83,8 +85,10 @@ function afterDownloadDeps() {
                     params.numberOfFailedTests++;
                     console.log("In " + params.numberOfFailedTests);
                 }
-            }
+                
+            });
         });
+        console.log(params);
         if (fs.existsSync(outputName)) {
             exec.exec("rm " + outputName).then((result) => {
                 console.log(result);
