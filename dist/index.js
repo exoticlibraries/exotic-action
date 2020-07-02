@@ -7300,8 +7300,8 @@ function afterDownloadDeps() {
                 reportProgress(params);
                 return;
             }
-            console.log(folder)
             fs.readdir(folder, async function (err, files) {
+                console.log(folder)
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
                   reportProgress(params);
