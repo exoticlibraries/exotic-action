@@ -8,9 +8,9 @@ var path = require('path');
 (async function() {
     try {
         const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
-        const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'array', [ '-pedantic' ]);
+        const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
         const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
-        const cesterOpts = getAndSanitizeInputs('cester-options', 'array', [ '--cester-noisolation', '--cester-nomemtest' ]);
+        const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
         const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
         const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
         const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
@@ -82,6 +82,9 @@ function getAndSanitizeInputs(key, type, defaultValue) {
     }
     if (type === "boolean") {
         return value.toUpperCase() === "TRUE" || value;
+    }
+    if (type === "flatten_string") {
+        return value.split('\n').join(' ');
     }
     if (type === "array" && (typeof value == "string")) {
         return strToArray(value, '\n');
