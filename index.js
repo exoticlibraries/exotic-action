@@ -48,6 +48,7 @@ function afterDownloadDeps() {
                 reportProgress(params);
                 return;
             }
+            console.log(folder)
             fs.readdir(folder, async function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
@@ -94,11 +95,9 @@ function afterDownloadDeps() {
                         params.numberOfFailedTests++;
                         params.numberOfTestsRan++;
                         console.error(!error.stdout ? "" : error.stdout);
-                        console.log("HAS TEST "+error.stdout.toString().indexOf("test"))
                         if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
                             console.error(error);
-                        }                 
-                        console.error(error);
+                        }
                     }
                     reportProgress(params);
                 });
