@@ -7339,6 +7339,7 @@ function strToArray(str, seperator) {
 async function downloadExoticLibraries() {
     console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux" || process.platform === "darwin") {
+        console.log("bash " + __dirname + "/../scripts/install.sh " + process.platform)
         await exec.exec("bash " + __dirname + "/../scripts/install.sh " + process.platform);
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + "'")

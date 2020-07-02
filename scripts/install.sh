@@ -1,6 +1,7 @@
 #!/bin/bash
 
 HEADER_PATH=/usr/include
+echo "First arg: $1"
 if [ "$1" = "darwin" ]; then
     HEADER_PATH=/usr/local/include
 fi
