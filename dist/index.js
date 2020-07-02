@@ -7283,12 +7283,12 @@ var path = __webpack_require__(622);
                       throw new Error("Could not list the content of test folder: " + folder);
                     }
                     files.forEach(function (file, index) {
-                        var skip = false;
+                        var skip = true;
                         console.log("For: " + file)
                         testFilePatterns.forEach(function (pattern, index) {
                             console.log("Pattern: "+pattern);
-                            if (!new RegExp(pattern).test(file)) {
-                                skip = true;
+                            if (new RegExp(pattern).test(file)) {
+                                skip = false;
                                 return false;
                             }
                         });
