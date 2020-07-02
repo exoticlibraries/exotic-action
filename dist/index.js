@@ -7383,7 +7383,7 @@ function afterAll(params) {
             var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
             console.log("Regression Result:")
             console.log(params.regressionOutput);
-            console.error(`${percentagePassed}% tests passed, ${params.numberOfFailedTests} tests failed out of ${params.numberOfTests}`);
+            console.log(`${percentagePassed}% tests passed, ${params.numberOfFailedTests} tests failed out of ${params.numberOfTests}`);
             if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
                 throw new Error("Regression test fails. Check the log above for details");
             }
