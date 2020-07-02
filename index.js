@@ -54,10 +54,8 @@ var path = require('path');
                         console.log("Running test: " + fullPath);
                         console.log("The compiler: " + selectedCompiler);
                         console.log("The arch: " + selectedArch);
-                        //gcc test/test_no_assert.c -I. -o out; ./out
                         var command = `${selectedCompiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                        console.log(command)
-                        //await exec.exec()
+                        await exec.exec(command);
                     });
                 });
             });
