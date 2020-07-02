@@ -57,7 +57,6 @@ async function afterDownloadDeps() {
               reportProgress(params);
               return;
             }
-            console.log(folder);
             for (j = 0; j < files.length; ++j) {
                 var file = files[j];
                 var skip = true;
@@ -87,12 +86,10 @@ async function afterDownloadDeps() {
                 try {
                     await exec.exec(command);
                     //console.log("" + fullPath + " Test Result");
-                    const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
-                    console.log(stdout);
-                    console.log(stderr);
-                    exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
-                        console.error(error);
-                    });
+                    var { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
+                    console.log(stdout); console.log(stderr);
+                    { stdout, stderr } = await jsexec(`rm ${outputName}`);
+                    console.log(stdout); console.log(stderr);
                     params.numberOfTestsRan++;
                 } catch (error) {
                     params.numberOfFailedTests++;
@@ -109,28 +106,33 @@ async function afterDownloadDeps() {
 }
 
 /**
-    This is here because I need to report 
-    the result after all the test in each folder 
-    has been executed and for some reason 
-    the js asyn/await is not blocking the 
-    thread as i want. So I report each progress.
+    This might fail to callthe afterAll 
+    function though no case now, but case 
+    is expected in future.
 */
 function reportProgress(params) {
     if (params.numberOfTestsRan === params.numberOfTests) {
-        console.log(params);
         afterAll(params);
     }
 }
 
 function afterAll(params) {
     try {
-        if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
-            throw new Error("Regression test fails. Check the log above for details");
-        }
+        const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
+        
         core.setOutput("tests-passed", (params.numberOfFailedTests === 0));
         core.setOutput("tests-count", params.numberOfTests);
         core.setOutput("failed-tests-count", params.numberOfFailedTests);
-        core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);
+        core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);        
+        if (runCesterRegression === true) {
+            console.log()
+            var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
+            console.error(`${percentagePassed} tests passed, ${params.numberOfTests} tests failed out of ${params.numberOfTests}`);
+            console.log()
+            if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
+                throw new Error("Regression test fails. Check the log above for details");
+            }
+        }
 
         // Get the JSON webhook payload for the event that triggered the workflow
         const payload = JSON.stringify(github.context.payload, undefined, 2)
