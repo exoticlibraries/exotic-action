@@ -181,6 +181,7 @@ function formatArch(selectedArch) {
         return "-m64";
     } else if (selectedArch == "x86") {
         if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
+            console.log("MacNOOOOOOOOOOOO");
             return "-m64";
         }
         return "-m32";
