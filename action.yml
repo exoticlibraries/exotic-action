@@ -18,9 +18,9 @@ inputs:
     description: 'Array of folders to run cester regression test in.'
     required: false
     default: |
+        testicles/
         test/
         tests/
-        testicles/
     
   test-file-pattern: 
     description: 'A regex pattern to match the file to run in each of the provided test folder'

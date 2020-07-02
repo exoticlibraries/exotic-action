@@ -36,7 +36,6 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
-    var noFolder = false;
     var outputName = "out";
     if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
         outputName = "out.exe";
