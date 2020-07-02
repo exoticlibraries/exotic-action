@@ -4,6 +4,7 @@ HEADER_PATH=/usr/include
 if [ "$1" = "darwin" ]; then
     HEADER_PATH=/usr/local/include
 fi
+echo "Secong Arg: $2"
 if [ "$2" = "x86" ]; then
     sudo apt-get install gcc-multilib -y
 fi    
