@@ -96,7 +96,7 @@ async function afterDownloadDeps() {
                 } catch (error) {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
-                    params.regressionOutput += `FAILED ${outputName}\n`;
+                    params.regressionOutput += `\nFAILED ${outputName}`;
                     console.error(!error.stdout ? "" : error.stdout);
                     if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
                         console.error(error);
