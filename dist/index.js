@@ -7450,6 +7450,7 @@ function downloadExoticLibraries(callback) {
         callback(false);
         return;
     }
+    console.log(command);
     exec.exec(command).then((result) => {
         if (result === 0) {
             callback(true);
