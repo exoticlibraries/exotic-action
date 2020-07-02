@@ -102,8 +102,8 @@ async function afterDownloadDeps() {
                         console.error(error);
                     }
                 }
-                reportProgress(params);
             }
+            reportProgress(params);
         }
     }
 }
