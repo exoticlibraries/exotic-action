@@ -7335,7 +7335,7 @@ function afterDownloadDeps() {
                 try {
                     await exec.exec(command);
                 } catch (error) {
-                    console.error(error);
+                    //console.error(error);
                     params.numberOfFailedTests++;
                     console.log("In " + params.numberOfFailedTests);
                 }
