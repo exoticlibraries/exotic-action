@@ -7362,7 +7362,6 @@ function reportProgress(params) {
 
 function afterAll(params) {
     try {
-        console.log("After All: " + params.numberOfFailedTests);
         if (params.numberOfFailedTests !== 0) {
             throw new Error("Regression test fails. Check the log above for details");
         }
