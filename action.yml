@@ -44,7 +44,7 @@ inputs:
     description: 'If false skip running the test files under test folders'
     required: false
     default: |
-        --cester-noisolation
+        --cester-verbose
         --cester-nomemtest
     
   the-matrix-compiler-internal-use-only: 
