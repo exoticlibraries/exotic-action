@@ -7342,7 +7342,8 @@ function afterDownloadDeps() {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
                     console.error(!error.stdout ? "" : error.stdout);
-                    if (!error.stdout.includes("test")) {
+                    console.log(error.stdout.indexOf(substring))
+                    if (!error.stdout || error.stdout.indexOf(substring) === -1) {
                         console.error(error);
                     }                 
                     console.error(error);
