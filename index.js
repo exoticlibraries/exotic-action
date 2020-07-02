@@ -48,14 +48,14 @@ function afterDownloadDeps() {
                 reportProgress(params);
                 return;
             }
-            fs.readdir(folder, function (err, files) {
+            fs.readdir(folder, async function (err, files) {
                 console.log(folder)
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
                   reportProgress(params);
                   return;
                 }
-                files.every(async function (file, index) {
+                files.every(function (file, index) {
                     var skip = true;
                     testFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
