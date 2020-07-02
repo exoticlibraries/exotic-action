@@ -7266,6 +7266,7 @@ function main() {
                 afterDownloadDeps();
             } else {
                 core.setFailed("Failed to download exotic libraries");
+                return;
             }
         });
     } else {
@@ -7295,11 +7296,13 @@ function afterDownloadDeps() {
         console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
         testFolders.forEach(function (folder, index) {
             if (!fs.existsSync(folder)) {
-                throw new Error("The test folder does not exist: " + folder);
+                core.setFailed("The test folder does not exist: " + folder);
+                return;
             }
             fs.readdir(folder, function (err, files) {
                 if (err) {
-                  throw new Error("Could not list the content of test folder: " + folder);
+                  core.setFailed("Could not list the content of test folder: " + folder);
+                  return;
                 }
                 files.forEach(async function (file, index) {
                     var skip = true;
