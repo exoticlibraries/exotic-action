@@ -50,7 +50,7 @@ function afterDownloadDeps() {
             fs.readdir(folder, function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
-                  return;
+                  return false;
                 }
                 files.every(async function (file, index) {
                     var skip = true;
@@ -60,14 +60,14 @@ function afterDownloadDeps() {
                             return false;
                         }
                     });
-                    if (skip === true) { return; }
+                    if (skip === true) { return false; }
                     testExludeFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
                             skip = true;
                             return false;
                         }
                     });
-                    if (skip === true) { return; }
+                    if (skip === true) { return false; }
                     
                     params.numberOfTests++;
                     var fullPath = path.join(folder, file);
@@ -79,6 +79,7 @@ function afterDownloadDeps() {
                     } catch (error) {
                         console.error(error);
                         params.numberOfFailedTests++;
+                        console.log("In " + params.numberOfFailedTests);
                     }
                     
                 });
