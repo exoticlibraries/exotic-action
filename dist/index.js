@@ -7273,7 +7273,7 @@ const fs = __webpack_require__(747);
         //console.log(`Compiler Options for Tests ${compilerOptsForTests}`);
         //console.log(`Run Cester Regression Tests ${runCesterRegression}`);
         //console.log(`Cester Options ${cesterOpts}`);
-        console.log(`Test Folders ${testFolders}`);
+        console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
 
         /*console.log()
         console.log("Test System")
