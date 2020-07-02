@@ -7288,24 +7288,26 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
-    var failed = false;
+    var noFolder = false;
     var outputName = "out";
     if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
         outputName = "out.exe";
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
         console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
-        testFolders.every(function (folder, index) {
+        testFolders.forEach(function iterate(folder, index) {
+            if(iterate.stop){ return; }
             if (!fs.existsSync(folder)) {
                 core.setFailed("The test folder does not exist: " + folder);
-                return false;
+                loop.stop = true;
+                return;
             }
             fs.readdir(folder, function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
                   return;
                 }
-                files.every(async function (file, index) {
+                files.forEach(async function (file, index) {
                     var skip = true;
                     testFilePatterns.every(function (pattern, index) {
                         if (new RegExp(pattern).test(file)) {
