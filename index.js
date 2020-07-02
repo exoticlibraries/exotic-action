@@ -103,8 +103,8 @@ async function afterDownloadDeps() {
                     }
                 }
             }
-            reportProgress(params);
         }
+        reportProgress(params);
     }
 }
 
