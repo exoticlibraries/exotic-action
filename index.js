@@ -78,7 +78,7 @@ function afterDownloadDeps() {
                 const options = {};
                 options.listeners = {
                     stdout: (data) => {
-                        console.log(data.toString());
+                        //console.log(data.toString());
                     },
                     stderr: (data) => {
                         console.log(data.toString());
