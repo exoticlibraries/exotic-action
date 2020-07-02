@@ -7443,7 +7443,7 @@ function formatArch(selectedArch) {
 
 function downloadExoticLibraries(callback) {
     var command = "";
-    const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
+    const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux" || process.platform === "darwin") {
