@@ -180,6 +180,9 @@ function formatArch(selectedArch) {
     if (selectedArch == "x64" || selectedArch.endsWith("x64")) {
         return "-m64";
     } else if (selectedArch == "x86") {
+        if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
+            return "-m64";
+        }
         return "-m32";
     } else {
         return "-march=" + selectedArch;
