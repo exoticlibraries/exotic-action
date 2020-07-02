@@ -88,7 +88,7 @@ async function afterDownloadDeps() {
                     //console.log("" + fullPath + " Test Result");
                     var { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
                     console.log(stdout); console.log(stderr);
-                    { stdout, stderr } = await jsexec(`rm ${outputName}`);
+                    var { stdout, stderr } = await jsexec(`rm ${outputName}`);
                     console.log(stdout); console.log(stderr);
                     params.numberOfTestsRan++;
                 } catch (error) {
