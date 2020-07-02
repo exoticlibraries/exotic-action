@@ -51,9 +51,10 @@ var path = require('path');
                         
                         var fullPath = path.join(folder, file);
                         var outputName = "out";
+                        if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+                            outputName = "out.exe";
+                        }
                         console.log("Running test: " + fullPath);
-                        console.log("The compiler: " + selectedCompiler);
-                        console.log("The arch: " + selectedArch);
                         var command = `${selectedCompiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
                         await exec.exec(command);
                     });
