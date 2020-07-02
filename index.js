@@ -81,7 +81,7 @@ function afterDownloadDeps() {
                     params.numberOfFailedTests++;
                     console.log("In " + params.numberOfFailedTests);
                 }
-                reportProgress(params, file);
+                reportProgress(numberOfFailedTests, params, file);
             });
         });
         if (fs.existsSync(outputName)) {
@@ -102,9 +102,10 @@ function afterDownloadDeps() {
     the js asyn/await is not blocking the 
     thread as it should. So I report each progress.
 */
-function reportProgress(params, file) {
+function reportProgress(numberOfFailedTests, params, file) {
+    console.log(numberOfFailedTests);
     console.log(params);
-    console.log("Done with " + file);
+    console.log("Done with2 " + file);
 }
 
 function afterAll(params) {
