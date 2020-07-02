@@ -7339,13 +7339,13 @@ function afterDownloadDeps() {
                     params.numberOfTestsRan++;
                 } catch (error) {
                     // I hope no slow down here
-                    console.error(error.stdout);
-                    if (!error.stdout.contains("test")) {
+                    params.numberOfFailedTests++;
+                    params.numberOfTestsRan++;
+                    console.error(!error.stdout ? "" : error.stdout);
+                    if (!error.stdout.includes("test")) {
                         console.error(error);
                     }                 
                     console.error(error);
-                    params.numberOfFailedTests++;
-                    params.numberOfTestsRan++;
                 }
                 reportProgress(params);
             });
