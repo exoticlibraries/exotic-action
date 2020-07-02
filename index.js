@@ -47,42 +47,41 @@ function afterDownloadDeps() {
                 core.setFailed("The test folder does not exist: " + folder);
                 return false;
             }
-            fs.readdir(folder, function (err, files) {
-                if (err) {
-                  core.setFailed("Could not list the content of test folder: " + folder);
-                  return false;
-                }
-                files.every(async function (file, index) {
-                    var skip = true;
-                    testFilePatterns.every(function (pattern, index) {
-                        if (new RegExp(pattern).test(file)) {
-                            skip = false;
-                            return false;
-                        }
-                    });
-                    if (skip === true) { return false; }
-                    testExludeFilePatterns.every(function (pattern, index) {
-                        if (new RegExp(pattern).test(file)) {
-                            skip = true;
-                            return false;
-                        }
-                    });
-                    if (skip === true) { return false; }
-                    
-                    params.numberOfTests++;
-                    var fullPath = path.join(folder, file);
-                    var compiler = selectCompilerExec(selectedCompiler, file);
-                    console.log("Running test: " + fullPath);
-                    var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                    try {
-                        await exec.exec(command);
-                    } catch (error) {
-                        console.error(error);
-                        params.numberOfFailedTests++;
-                        console.log("In " + params.numberOfFailedTests);
+            var files  = fs.readdirSync(folder);
+            if (!files) {
+              core.setFailed("Could not list the content of test folder: " + folder);
+              return false;
+            }
+            files.every(async function (file, index) {
+                var skip = true;
+                testFilePatterns.every(function (pattern, index) {
+                    if (new RegExp(pattern).test(file)) {
+                        skip = false;
+                        return false;
                     }
-                    
                 });
+                if (skip === true) { return false; }
+                testExludeFilePatterns.every(function (pattern, index) {
+                    if (new RegExp(pattern).test(file)) {
+                        skip = true;
+                        return false;
+                    }
+                });
+                if (skip === true) { return false; }
+                
+                params.numberOfTests++;
+                var fullPath = path.join(folder, file);
+                var compiler = selectCompilerExec(selectedCompiler, file);
+                console.log("Running test: " + fullPath);
+                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
+                try {
+                    await exec.exec(command);
+                } catch (error) {
+                    console.error(error);
+                    params.numberOfFailedTests++;
+                    console.log("In " + params.numberOfFailedTests);
+                }
+                
             });
         });
         if (fs.existsSync(outputName)) {
