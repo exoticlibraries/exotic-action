@@ -7298,8 +7298,8 @@ function afterDownloadDeps() {
                 core.setFailed("The test folder does not exist: " + folder);
                 return false;
             }
-            fs.readdir(folder, function (err, files) {
-                console.log(folder);
+            console.log(folder);
+            fs.readdir(folder, async function (err, files) {
                 if (err) {
                   core.setFailed("Could not list the content of test folder: " + folder);
                   return;
