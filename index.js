@@ -73,7 +73,7 @@ function afterDownloadDeps() {
                 var fullPath = path.join(folder, file);
                 var compiler = selectCompilerExec(selectedCompiler, file);
                 console.log("Running test: " + fullPath);
-                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}`;
+                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
                     await exec.exec("./${outputName} ${cesterOpts}");
