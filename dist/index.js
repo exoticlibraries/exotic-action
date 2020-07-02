@@ -7333,7 +7333,7 @@ async function afterDownloadDeps() {
                 var compiler = selectCompilerExec(selectedCompiler, file);
                 var outputName = file.replace(/\.[^/.]+$/, "");
                 var prefix = "./";
-                if (process.platform.startsWith("windows")) {
+                if (process.platform.startsWith("win")) {
                     outputName += ".exe";
                     prefix = "";
                 }
