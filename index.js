@@ -5,22 +5,20 @@ const exec = require("@actions/exec");
 const fs = require('fs');
 var path = require('path');
 
-try {
+main();
+function main() {
     const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
-
     if (downloadExLibs === true) {
         downloadExoticLibraries(function(completed) {
             if (completed === true) {
                 afterDownloadDeps();
             } else {
-                throw new Error("Failed to download exotic libraries");
+                core.setFailed("Failed to download exotic libraries");
             }
         });
     } else {
         afterDownloadDeps();
     }
-} catch (error) {
-    core.setFailed(error.message);
 }
 
 function afterDownloadDeps() {

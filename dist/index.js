@@ -7257,22 +7257,20 @@ const exec = __webpack_require__(842);
 const fs = __webpack_require__(747);
 var path = __webpack_require__(622);
 
-try {
+main();
+function main() {
     const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
-
     if (downloadExLibs === true) {
         downloadExoticLibraries(function(completed) {
             if (completed === true) {
                 afterDownloadDeps();
             } else {
-                throw new Error("Failed to download exotic libraries");
+                core.setFailed("Failed to download exotic libraries");
             }
         });
     } else {
         afterDownloadDeps();
     }
-} catch (error) {
-    core.setFailed(error.message);
 }
 
 function afterDownloadDeps() {
