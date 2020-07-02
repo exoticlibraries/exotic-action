@@ -7328,12 +7328,14 @@ function afterDownloadDeps() {
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
                 try {
                     await exec.exec(command);
+                    params.numberOfTestsRan++;
                 } catch (error) {
                     console.error(error);
                     params.numberOfFailedTests++;
+                    params.numberOfTestsRan++;
                     console.log("In " + params.numberOfFailedTests);
                 }
-                reportProgress(params.numberOfFailedTests, params, file);
+                reportProgress(params);
             });
         });
         if (fs.existsSync(outputName)) {
@@ -7343,7 +7345,6 @@ function afterDownloadDeps() {
                 console.error(error);
             });
         }
-        afterAll(params);
     }
 }
 
@@ -7354,10 +7355,10 @@ function afterDownloadDeps() {
     the js asyn/await is not blocking the 
     thread as it should. So I report each progress.
 */
-function reportProgress(numberOfFailedTests, params, file) {
-    console.log(numberOfFailedTests);
-    console.log(params);
-    console.log("Done with2 " + file);
+function reportProgress(params) {
+    if (params.numberOfTestsRan === params.numberOfTests) {
+        afterAll(params);
+    }
 }
 
 function afterAll(params) {
