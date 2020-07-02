@@ -47,6 +47,11 @@ inputs:
         --cester-noisolation
         --cester-nomemtest
     
+  the-matrix-compiler-internal-use-only: 
+    description: 'The compiler to use to run the regression tests. Note: do not change the value in workflow yml.'
+    required: false
+    default: ${{ matrix.compiler }}
+    
 outputs:
   tests-passed:
     description: 'true if the cester regression test passed'
