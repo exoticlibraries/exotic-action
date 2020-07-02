@@ -7273,7 +7273,7 @@ var path = __webpack_require__(622);
         var numberOfTests = 0;
 
         if (downloadExLibs === true) {
-            if (await downloadExoticLibraries() === false) {
+            if (downloadExoticLibraries() === false) {
                 throw new Error("Failed to download exotic libraries");
             }
         }
@@ -7319,6 +7319,13 @@ var path = __webpack_require__(622);
                             numberOfFailedTests++;
                             console.error(error);
                         });
+                        if (fs.existsSync(outputName)) {
+                            exec.exec("rm " + outputName).then((result) => {
+                                console.log(result);
+                            }).catch((error) => {
+                                console.error(error);
+                            });
+                        }
                     });
                 });
             });
@@ -7382,14 +7389,21 @@ function formatArch(selectedArch) {
     }
 }
 
-async function downloadExoticLibraries() {
+function downloadExoticLibraries() {
     console.log("Downloading Exotic Libraries...")
+    var command = "";
     if (process.platform === "linux" || process.platform === "darwin") {
-        await exec.exec("bash " + __dirname + "/../scripts/install.sh " + process.platform);
+        command = "bash " + __dirname + "/../scripts/install.sh " + process.platform;
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + "'")
         return false;
     }
+    exec.exec(command).then((result) => {
+        console.log(result);
+    }).catch((error) => {
+        console.error(error);
+        return false;
+    });
     return true;
 }
 
