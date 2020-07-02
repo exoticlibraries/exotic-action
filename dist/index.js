@@ -7344,7 +7344,7 @@ async function afterDownloadDeps() {
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
                     console.log(stdout); console.log(stderr);
                     params.numberOfTestsRan++;
-                    params.regressionOutput += `PASSED ${outputName}\n`;
+                    params.regressionOutput += `\nPASSED ${outputName}`;
                 } catch (error) {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
@@ -7433,7 +7433,6 @@ function formatArch(selectedArch) {
         return "-m64";
     } else if (selectedArch == "x86") {
         if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
-            console.log("MacNOOOOOOOOOOOO");
             return "-m64";
         }
         return "-m32";
