@@ -35,7 +35,6 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
-    var 
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "") {
         console.log(`Test Folders ${testFolders} ~~ ` + (testFolders instanceof Array));
         testFolders.forEach(function (folder, index) {
