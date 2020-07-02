@@ -177,7 +177,7 @@ function selectCompilerExec(selectedCompiler, file) {
 }
 
 function formatArch(selectedArch) {
-    if (selectedArch == "x64") {
+    if (selectedArch == "x64" || selectedArch.endsWith("x64")) {
         return "-m64";
     } else if (selectedArch == "x86") {
         return "-m32";
@@ -187,12 +187,14 @@ function formatArch(selectedArch) {
 }
 
 function downloadExoticLibraries(callback) {
-    console.log("Downloading Exotic Libraries...")
     var command = "";
+    const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
+    
+    console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux" || process.platform === "darwin") {
-        command = "bash " + __dirname + "/../scripts/install.sh " + process.platform;
+        command = "bash " + __dirname + "/../scripts/install.sh " + process.platform + " " + selectedArch;
     } else {
-        console.error("Exotic Action is not supported on this platform '" + process.platform + "'")
+        console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
         callback(false);
         return;
     }
