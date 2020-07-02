@@ -7,8 +7,10 @@ const jsexec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 var path = require('path');
 
-main();
-function main() {
+(async function() {
+    main();
+})()
+async function main() {
     const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
     if (downloadExLibs === true) {
         downloadExoticLibraries(function(completed) {
