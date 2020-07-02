@@ -7263,14 +7263,16 @@ function main() {
     if (downloadExLibs === true) {
         downloadExoticLibraries(function(completed) {
             if (completed === true) {
-                afterDownloadDeps();
+                var params = afterDownloadDeps();
+                afterAll(params);
             } else {
                 core.setFailed("Failed to download exotic libraries");
                 return;
             }
         });
     } else {
-        afterDownloadDeps();
+        var params = afterDownloadDeps();
+        afterAll(params);
     }
 }
 
@@ -7340,7 +7342,6 @@ function afterDownloadDeps() {
                 
             });
         });
-        console.log(params);
         if (fs.existsSync(outputName)) {
             exec.exec("rm " + outputName).then((result) => {
                 console.log(result);
@@ -7348,8 +7349,8 @@ function afterDownloadDeps() {
                 console.error(error);
             });
         }
-        afterAll(params);
     }
+    return params;
 }
 
 function afterAll(params) {
