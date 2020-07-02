@@ -11,16 +11,14 @@ function main() {
     if (downloadExLibs === true) {
         downloadExoticLibraries(function(completed) {
             if (completed === true) {
-                var params = afterDownloadDeps();
-                afterAll(params);
+                afterDownloadDeps();
             } else {
                 core.setFailed("Failed to download exotic libraries");
                 return;
             }
         });
     } else {
-        var params = afterDownloadDeps();
-        afterAll(params);
+        afterDownloadDeps();
     }
 }
 
@@ -38,6 +36,7 @@ function afterDownloadDeps() {
         numberOfFailedTests: 0,
         numberOfTests: 0
     }
+    var tests = [];
     var outputName = "out";
     if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
         outputName = "out.exe";
@@ -53,10 +52,6 @@ function afterDownloadDeps() {
             if (!files) {
               core.setFailed("Could not list the content of test folder: " + folder);
               return false;
-            }
-            var i;
-            for (i = 0; i < files.length; i++) {
-                var file = files[i];
             }
             files.every(async function (file, index) {
                 var skip = true;
@@ -80,16 +75,21 @@ function afterDownloadDeps() {
                 var compiler = selectCompilerExec(selectedCompiler, file);
                 console.log("Running test: " + fullPath);
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                try {
-                    await exec.exec(command);
-                } catch (error) {
-                    //console.error(error);
-                    params.numberOfFailedTests++;
-                    console.log("In " + params.numberOfFailedTests);
-                }
+                tests.push(exec.exec(command));
                 
             });
         });
+        var i;
+        for (i = 0; i < tests.length; i++) {
+            console.log("Running test " +  i);
+        }
+            /*try {
+                await ;
+            } catch (error) {
+                console.error(error);
+                params.numberOfFailedTests++;
+                console.log("In " + params.numberOfFailedTests);
+            }*/
         if (fs.existsSync(outputName)) {
             exec.exec("rm " + outputName).then((result) => {
                 console.log(result);
@@ -97,8 +97,8 @@ function afterDownloadDeps() {
                 console.error(error);
             });
         }
+        afterAll(params);
     }
-    return params;
 }
 
 function afterAll(params) {
