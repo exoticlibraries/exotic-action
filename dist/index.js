@@ -7284,7 +7284,7 @@ var path = __webpack_require__(622);
                     if (err) {
                       throw new Error("Could not list the content of test folder: " + folder);
                     }
-                    files.forEach(function (file, index) {
+                    files.forEach(async function (file, index) {
                         var skip = true;
                         testFilePatterns.forEach(function (pattern, index) {
                             if (new RegExp(pattern).test(file)) {
@@ -7303,13 +7303,12 @@ var path = __webpack_require__(622);
                         
                         var fullPath = path.join(folder, file);
                         var outputName = "out";
+                        if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+                            outputName = "out.exe";
+                        }
                         console.log("Running test: " + fullPath);
-                        console.log("The compiler: " + selectedCompiler);
-                        console.log("The arch: " + selectedArch);
-                        //gcc test/test_no_assert.c -I. -o out; ./out
                         var command = `${selectedCompiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                        console.log(command)
-                        //await exec.exec()
+                        await exec.exec(command);
                     });
                 });
             });

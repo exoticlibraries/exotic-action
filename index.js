@@ -32,7 +32,7 @@ var path = require('path');
                     if (err) {
                       throw new Error("Could not list the content of test folder: " + folder);
                     }
-                    files.forEach(function (file, index) {
+                    files.forEach(async function (file, index) {
                         var skip = true;
                         testFilePatterns.forEach(function (pattern, index) {
                             if (new RegExp(pattern).test(file)) {
