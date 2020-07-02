@@ -7332,8 +7332,8 @@ function afterDownloadDeps() {
                 try {
                     await exec.exec(command);
                     const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
-                    console.log('stdout:', stdout);
-                    console.log('stderr:', stderr);
+                    console.log(stdout);
+                    console.log(stderr);
                     exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
                         console.error(error);
                     });
