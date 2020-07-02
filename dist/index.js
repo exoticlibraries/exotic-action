@@ -7332,14 +7332,16 @@ async function afterDownloadDeps() {
                 var fullPath = path.join(folder, file);
                 var compiler = selectCompilerExec(selectedCompiler, file);
                 var outputName = file.replace(/\.[^/.]+$/, "");
-                if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+                var prefix = "./";
+                if (process.platform.startsWith("windows")) {
                     outputName += ".exe";
+                    prefix = "";
                 }
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
                     //console.log("" + fullPath + " Test Result");
-                    var { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
+                    var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
                     console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
                     console.log(stdout); console.log(stderr);
