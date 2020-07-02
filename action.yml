@@ -18,7 +18,6 @@ inputs:
     description: 'Array of folders to run cester regression test in.'
     required: false
     default: |
-        testicles/
         test/
         tests/
     
