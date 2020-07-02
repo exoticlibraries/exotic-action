@@ -7268,6 +7268,9 @@ var path = __webpack_require__(622);
         const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
         const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
         const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
+        
+        var numberOfFailedTests = 0;
+        var numberOfTests = 0;
 
         if (downloadExLibs === true) {
             if (await downloadExoticLibraries() === false) {
@@ -7284,7 +7287,7 @@ var path = __webpack_require__(622);
                     if (err) {
                       throw new Error("Could not list the content of test folder: " + folder);
                     }
-                    files.forEach(async function (file, index) {
+                    files.forEach(function (file, index) {
                         var skip = true;
                         testFilePatterns.forEach(function (pattern, index) {
                             if (new RegExp(pattern).test(file)) {
@@ -7301,6 +7304,7 @@ var path = __webpack_require__(622);
                         });
                         if (skip === true) { return; }
                         
+                        numberOfTests++;
                         var fullPath = path.join(folder, file);
                         var outputName = "out";
                         var compiler = selectCompilerExec(selectedCompiler, file);
@@ -7309,7 +7313,12 @@ var path = __webpack_require__(622);
                         }
                         console.log("Running test: " + fullPath);
                         var command = `${compiler} ${selectedArch} ${compilerOptsForTests} ${fullPath} -o ${outputName}; ./${outputName} ${cesterOpts}`;
-                        await exec.exec(command);
+                        exec.exec(command).then((result) => {
+                            console.log(result);
+                        }).catch((error) => {
+                            numberOfFailedTests++;
+                            console.error(error);
+                        });
                     });
                 });
             });
@@ -7317,7 +7326,11 @@ var path = __webpack_require__(622);
 
 
         // after
-        core.setOutput("tests-passed", true);
+        core.setOutput("tests-passed", (numberOfFailedTests === 0));
+        core.setOutput("tests-count", numberOfTests);
+        core.setOutput("failed-tests-count", numberOfFailedTests);
+        core.setOutput("passed-tests-count", numberOfTests - numberOfFailedTests);
+
         // Get the JSON webhook payload for the event that triggered the workflow
         const payload = JSON.stringify(github.context.payload, undefined, 2)
         //console.log(`The event payload: ${payload}`);
