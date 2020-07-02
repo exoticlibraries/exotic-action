@@ -7333,7 +7333,7 @@ function afterDownloadDeps() {
                     params.numberOfFailedTests++;
                     console.log("In " + params.numberOfFailedTests);
                 }
-                reportProgress(numberOfFailedTests, params, file);
+                reportProgress(params.numberOfFailedTests, params, file);
             });
         });
         if (fs.existsSync(outputName)) {
