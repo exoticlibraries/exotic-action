@@ -7284,19 +7284,24 @@ var path = __webpack_require__(622);
                     }
                     files.forEach(function (file, index) {
                         var skip = false;
+                        console.log("For: " + file)
                         testFilePatterns.forEach(function (pattern, index) {
+                            console.log("Pattern: "+pattern);
                             if (!new RegExp(pattern, 'i').test(file)) {
                                 skip = true;
                                 return false;
                             }
                         });
+                        console.log("1: " + skip);
                         if (skip === true) { return; }
                         testExludeFilePatterns.forEach(function (pattern, index) {
+                            console.log("Exclude Pattern: "+pattern);
                             if (new RegExp(pattern, 'i').test(file)) {
                                 skip = true;
                                 return false;
                             }
                         });
+                        console.log("2: " + skip);
                         if (skip === true) { return; }
                         
                         var fullPath = path.join(folder, file);
