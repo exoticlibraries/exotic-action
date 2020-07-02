@@ -7324,8 +7324,10 @@ var path = __webpack_require__(622);
             });
         }
 
-
         // after
+        if (numberOfFailedTests !== 0) {
+            throw new Error("Regression test fails. Check the log above for details");
+        }
         core.setOutput("tests-passed", (numberOfFailedTests === 0));
         core.setOutput("tests-count", numberOfTests);
         core.setOutput("failed-tests-count", numberOfFailedTests);
