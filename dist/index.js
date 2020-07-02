@@ -7254,8 +7254,8 @@ module.exports = function(fn) {
 const core = __webpack_require__(435);
 const github = __webpack_require__(342);
 const exec = __webpack_require__(842);
-const http = __webpack_require__(605);
 const fs = __webpack_require__(747);
+var path = __webpack_require__(622);
 
 (async function() {
     try {
@@ -7264,6 +7264,8 @@ const fs = __webpack_require__(747);
         const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
         const cesterOpts = getAndSanitizeInputs('cester-options', 'array', [ '--cester-noisolation', '--cester-nomemtest' ]);
         const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
+        const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
+        const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
 
         if (downloadExLibs === true) {
             if (await downloadExoticLibraries() === false) {
@@ -7281,7 +7283,24 @@ const fs = __webpack_require__(747);
                       throw new Error("Could not list the content of test folder: " + folder);
                     }
                     files.forEach(function (file, index) {
-                        console.log(file);
+                        var skip = false;
+                        testFilePatterns.forEach(function (pattern, index) {
+                            if (!new RegExp(pattern, 'i').test(file)) {
+                                skip = true;
+                                return false;
+                            }
+                        });
+                        if (skip === true) { return true; }
+                        testExludeFilePatterns.forEach(function (pattern, index) {
+                            if (new RegExp(pattern, 'i').test(file)) {
+                                skip = true;
+                                return false;
+                            }
+                        });
+                        if (skip === true) { return true; }
+                        
+                        var fullPath = path.join(folder, file);
+                        console.log(fullPath);
                     });
                 });
             });

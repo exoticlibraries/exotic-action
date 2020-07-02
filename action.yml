@@ -21,6 +21,19 @@ inputs:
         test/
         tests/
     
+  test-file-pattern: 
+    description: 'A regex pattern to match the file to run in each of the provided test folder'
+    required: false
+    default: |
+        ^test_
+        _test[.c](c\+\+|cpp|c)
+    
+  test-exclude-file-pattern: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder'
+    required: false
+    default: |
+        mock+
+    
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'
     required: false
