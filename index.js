@@ -48,61 +48,60 @@ function afterDownloadDeps() {
                 reportProgress(params);
                 return;
             }
-            fs.readdir(folder, async function (err, files) {
-                console.log(folder)
-                if (err) {
-                  core.setFailed("Could not list the content of test folder: " + folder);
-                  reportProgress(params);
-                  return;
-                }
-                var i;
-                for (i = 0; i < files.length; ++i) {
-                    var file = files[i];
-                    var skip = true;
-                    testFilePatterns.every(function (pattern, index) {
-                        if (new RegExp(pattern).test(file)) {
-                            skip = false;
-                            return false;
-                        }
-                    });
-                    if (skip === true) { return true; }
-                    testExludeFilePatterns.every(function (pattern, index) {
-                        if (new RegExp(pattern).test(file)) {
-                            skip = true;
-                            return false;
-                        }
-                    });
-                    if (skip === true) { return true; }
-                    
-                    params.numberOfTests++;
-                    var fullPath = path.join(folder, file);
-                    var compiler = selectCompilerExec(selectedCompiler, file);
-                    var outputName = file.replace(/\.[^/.]+$/, "");
-                    if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
-                        outputName += ".exe";
+            var files = fs.readdirSync(folder);
+            if (!files) {
+              core.setFailed("Could not list the content of test folder: " + folder);
+              reportProgress(params);
+              return;
+            }
+            console.log(folder);
+            var i;
+            for (i = 0; i < files.length; ++i) {
+                var file = files[i];
+                var skip = true;
+                testFilePatterns.every(async function (pattern, index) {
+                    if (new RegExp(pattern).test(file)) {
+                        skip = false;
+                        return false;
                     }
-                    var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
-                    try {
-                        await exec.exec(command);
-                        //console.log("" + fullPath + " Test Result");
-                        const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
-                        console.log(stdout);
-                        console.log(stderr);
-                        exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
-                            console.error(error);
-                        });
-                        params.numberOfTestsRan++;
-                    } catch (error) {
-                        params.numberOfFailedTests++;
-                        params.numberOfTestsRan++;
-                        console.error(!error.stdout ? "" : error.stdout);
-                        if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
-                            console.error(error);
-                        }
+                });
+                if (skip === true) { return true; }
+                testExludeFilePatterns.every(function (pattern, index) {
+                    if (new RegExp(pattern).test(file)) {
+                        skip = true;
+                        return false;
                     }
-                    reportProgress(params);
+                });
+                if (skip === true) { return true; }
+                
+                params.numberOfTests++;
+                var fullPath = path.join(folder, file);
+                var compiler = selectCompilerExec(selectedCompiler, file);
+                var outputName = file.replace(/\.[^/.]+$/, "");
+                if (selectedCompiler.startsWith("clang") && process.platform.startsWith("windows")) {
+                    outputName += ".exe";
                 }
-            });
+                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
+                try {
+                    await exec.exec(command);
+                    //console.log("" + fullPath + " Test Result");
+                    const { stdout, stderr } = await jsexec(`./${outputName} ${cesterOpts}`);
+                    console.log(stdout);
+                    console.log(stderr);
+                    exec.exec("rm " + outputName).then((result) => { }).catch((error) => {
+                        console.error(error);
+                    });
+                    params.numberOfTestsRan++;
+                } catch (error) {
+                    params.numberOfFailedTests++;
+                    params.numberOfTestsRan++;
+                    console.error(!error.stdout ? "" : error.stdout);
+                    if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
+                        console.error(error);
+                    }
+                }
+                reportProgress(params);
+            }
         }
     }
 }
