@@ -194,13 +194,14 @@ function formatArch(selectedArch) {
 function downloadExoticLibraries(callback) {
     var command = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
+    const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...")
     if (process.platform === "linux" || process.platform === "darwin") {
-        command = "bash " + __dirname + "/../scripts/install.sh " + process.platform + " " + selectedArch;
+        command = "bash " + __dirname + "/../scripts/install.sh " + process.platform + " " + selectedArch + " " + selectedCompiler;
         
     } else if (process.platform === "win32") {
-        command = "powershell " + __dirname + "/../scripts/install.ps1 " + process.platform + " " + selectedArch;
+        command = "powershell " + __dirname + "/../scripts/install.ps1 " + process.platform + " " + selectedArc + " " + selectedCompiler;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
