@@ -7453,7 +7453,7 @@ function downloadExoticLibraries(callback) {
         command = "bash " + __dirname + "/../scripts/install.sh " + process.platform + " " + selectedArch + " " + selectedCompiler;
         
     } else if (process.platform === "win32") {
-        command = "powershell " + __dirname + "/../scripts/install.ps1 " + process.platform + " " + selectedArc + " " + selectedCompiler;
+        command = "powershell " + __dirname + "/../scripts/install.ps1 " + process.platform + " " + selectedArch + " " + selectedCompiler;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
