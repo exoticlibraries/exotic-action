@@ -47,6 +47,11 @@ inputs:
         --cester-verbose
         --cester-nomemtest
     
+  install-compilers:
+    description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'
+    required: false
+    default:      
+    
   the-matrix-compiler-internal-use-only: 
     description: 'The compiler to use to run the regression tests. Note: do not change the value in workflow yml.'
     required: false

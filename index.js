@@ -26,6 +26,7 @@ function main() {
     }
 }
 
+// TODO: treats install-compilers
 async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
