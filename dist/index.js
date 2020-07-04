@@ -7257,7 +7257,8 @@ const exec = __webpack_require__(842);
 const util = __webpack_require__(669);
 const jsexec = util.promisify(__webpack_require__(129).exec);
 const fs = __webpack_require__(747);
-var path = __webpack_require__(622);
+const path = __webpack_require__(622);
+const homedir = __webpack_require__(87).homedir();
 
 main();
 function main() {
@@ -7289,6 +7290,7 @@ async function afterDownloadDeps() {
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
+    const exoIncludePath = homedir + "/.yo/include/exotic";
     
     var params = {
         numberOfTestsRan: 0,
@@ -7340,7 +7342,7 @@ async function afterDownloadDeps() {
                     outputName += ".exe";
                     prefix = "";
                 }
-                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
+                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. -I${exoIncludePath} ${fullPath} -o ${outputName}`;
                 try {
                     await exec.exec(command);
                     var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
@@ -7490,7 +7492,6 @@ function downloadExoticLibraries(callback) {
         callback(false);
     });
 }
-
 
 
 
