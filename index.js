@@ -38,7 +38,7 @@ async function afterDownloadDeps() {
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    const exoIncludePath = homedir + "/.yo/include/exotic";
+    const exoIncludePath = homedir + "/.yo/include/";
     
     var params = {
         numberOfTestsRan: 0,
