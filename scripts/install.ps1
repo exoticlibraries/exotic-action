@@ -6,7 +6,7 @@ Invoke-WebRequest https://raw.githubusercontent.com/exoticlibraries/libcester/ma
 [System.IO.Directory]::CreateDirectory($ExoPath) > $null
 If ( -not $?) {
     "Failed to create the folder $($ExoPath). Skipping..." 
-    Return
+    Exit 1
 }
 " => Installing libcester into $ExoPath"
 Copy-Item -Path ./cester.h -Destination $ExoPath -Force
