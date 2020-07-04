@@ -90,6 +90,7 @@ async function afterDownloadDeps() {
                 }
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
+                    console.log(command);
                     var { stdout, stderr } = await jsexec(command);
                     console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
