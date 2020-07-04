@@ -7344,7 +7344,8 @@ async function afterDownloadDeps() {
                 }
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. -I${exoIncludePath} ${fullPath} -o ${outputName}`;
                 try {
-                    await jsexec(command);
+                    var { stdout, stderr } = await jsexec(command);
+                    console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
                     console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
@@ -7355,8 +7356,8 @@ async function afterDownloadDeps() {
                     params.numberOfFailedTests++;
                     params.numberOfTestsRan++;
                     params.regressionOutput += `\nFAILED ${outputName}`;
-                    console.error(!error.stdout ? "" : error.stdout);
-                    if (!error.stdout || error.stdout.toString().indexOf("test") === -1) {
+                    console.error(!error.stdout ? (!error.stderr ? "" : error.stderr) : error.stdout);
+                    if ((!error.stdout && !error.stderr) || error.stdout.toString().indexOf("test") === -1) {
                         console.error(error);
                     }
                 }
@@ -7436,7 +7437,7 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         }
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
             if (selectedArchNoFormat === "x86") {
-                return `echo yea && C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
+                return `SET PATH=%PATH%;C:\\msys64\\mingw${arch}\\bin && C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
             } else {
                 return ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
             }
