@@ -1,7 +1,4 @@
 
-Set-ExecutionPolicy Bypass -Scope Process -Force; 
-iex ((New-Object System.Net.WebClient).DownloadString('https://exoticlibraries.github.io/libcester/cester.ps1'))
-Remove-Item cester.h
 
 If ($args[2] -eq "clang") {
     echo "installing clang according to the walkthrough on https://ariya.io/2020/01/clang-on-windows"
@@ -17,3 +14,7 @@ If ($args[2] -eq "clang") {
     }
     # Set the path also before running regression
 }
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; 
+iex ((New-Object System.Net.WebClient).DownloadString('https://exoticlibraries.github.io/libcester/cester.ps1'))
+Remove-Item cester.h
