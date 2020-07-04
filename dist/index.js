@@ -7288,6 +7288,7 @@ async function afterDownloadDeps() {
     const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
+    const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     var params = {
         numberOfTestsRan: 0,
@@ -7331,7 +7332,7 @@ async function afterDownloadDeps() {
                 
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
-                var compiler = selectCompilerExec(selectedCompiler, file);
+                var compiler = selectCompilerExec(selectedArchNoFormat, selectedCompiler, file);
                 var outputName = file.replace(/\.[^/.]+$/, "");
                 var prefix = "./";
                 if (process.platform.startsWith("win")) {
@@ -7381,7 +7382,10 @@ function afterAll(params) {
         core.setOutput("tests-passed", (params.numberOfFailedTests === 0));
         core.setOutput("tests-count", params.numberOfTests);
         core.setOutput("failed-tests-count", params.numberOfFailedTests);
-        core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);        
+        core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);    
+        
+        // compilers paths
+        core.setOutput("win32-clang-folder", "C:\\tools\\msys64\\" + ((selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
         if (runCesterRegression === true) {
             var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
             console.log("Regression Result:")
@@ -7422,16 +7426,20 @@ function strToArray(str, seperator) {
     return str.split(seperator);
 }
 
-function selectCompilerExec(selectedCompiler, file) {
+function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
     if (selectedCompiler.startsWith("gnu")) {
         return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
     } else if (selectedCompiler.startsWith("clang")) {
         if (process.platform.startsWith("win")) {
+            var arch = "mingw64";
+            if (selectedArchNoFormat === "x86") {
+                arch = "mingw32";
+            }
             // the clang compiler must have been installed for windows using install.ps1
             if (file.endsWith('cpp') || file.endsWith('c++')) {
-                return "C:\\tools\\msys64\\mingw64\\bin\\clang++.exe";
+                return `C:\\tools\\msys64\\${arch}\\bin\\clang++.exe`;
             } else {
-                return "C:\\tools\\msys64\\mingw64\\bin\\clang.exe";
+                return `C:\\tools\\msys64\\${arch}\\bin\\clang.exe`;
             }
         }
         return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
