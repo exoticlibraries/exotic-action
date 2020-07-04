@@ -176,22 +176,30 @@ function strToArray(str, seperator) {
 }
 
 function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
-    if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
-        return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
-    } else if (selectedCompiler.startsWith("clang")) {
-        if (process.platform.startsWith("win")) {
-            var arch = "mingw64";
-            if (selectedArchNoFormat === "x86") {
-                arch = "mingw32";
-            }
-            // the clang compiler must have been installed for windows using install.ps1
+    if (process.platform.startsWith("win")) {
+        var arch = "64";
+        if (selectedArchNoFormat === "x86") {
+            arch = "32";
+        }
+        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
             if (file.endsWith('cpp') || file.endsWith('c++')) {
-                return `C:\\tools\\msys64\\${arch}\\bin\\clang++.exe`;
+                return `C:\msys64\mingw${arch}\bin\clang++.exe`;
             } else {
-                return `C:\\tools\\msys64\\${arch}\\bin\\clang.exe`;
+                return `C:\msys64\mingw${arch}\bin\clang.exe`;
+            }
+        } else if (selectedCompiler.startsWith("clang")) {
+            if (file.endsWith('cpp') || file.endsWith('c++')) {
+                return `C:\msys64\clang${arch}\bin\clang++.exe`;
+            } else {
+                return `C:\msys64\clang${arch}\bin\clang.exe`;
             }
         }
-        return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+    } else {
+        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
+            return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
+        } else if (selectedCompiler.startsWith("clang")) {
+            return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+        }
     }
 }
 

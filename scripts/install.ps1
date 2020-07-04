@@ -1,5 +1,7 @@
 
 
+<# # Clang is already installed in thw Windows image C:\msys64\
+# Damn, it took me 48 hours to setup clang installtion for nothin :(
 If ($args[2] -eq "clang") {
     echo "installing clang according to the walkthrough on https://ariya.io/2020/01/clang-on-windows"
     choco install --no-progress --yes msys2
@@ -15,8 +17,13 @@ If ($args[2] -eq "clang") {
         pacman --noconfirm -S msys/make mingw64/mingw-w64-x86_64-clang
     }
     # Set the path also before running regression
-}
+} #>
 
+If ($args[1] -eq "x86") {
+    $env:Path = "C:\msys64\clang32\bin;C:\msys64\mingw32\bin"
+} Else {
+    $env:Path = "C:\msys64\clang64\bin;C:\msys64\mingw64\bin"
+}
 Set-ExecutionPolicy Bypass -Scope Process -Force; 
 iex ((New-Object System.Net.WebClient).DownloadString('https://exoticlibraries.github.io/libcester/cester.ps1'))
 Remove-Item cester.h
