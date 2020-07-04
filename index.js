@@ -187,7 +187,6 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             } else {
                 return `C:\\msys64\\mingw${arch}\\bin\\clang.exe`;
             }
-        }  }
         }
     } else {
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
