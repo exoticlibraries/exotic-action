@@ -5,12 +5,6 @@ $Global:IncludePaths = New-Object System.Collections.Generic.List[System.Object]
 $Global:MingWFolder32 = "C:/msys64/mingw32/x86_64-w64-mingw32/include/exotic/"
 $Global:MingWFolder64 = "C:/msys64/mingw64/x86_64-w64-mingw32/include/exotic/"
 
-If ($args[1] -eq "x86") {
-    $env:Path += ";C:\msys64\clang32\bin;C:\msys64\mingw32\bin"
-} Else {
-    $env:Path += ";C:\msys64\clang64\bin;C:\msys64\mingw64\bin"
-}
-
 "Downloading $NAME ..."
 Invoke-WebRequest https://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h -OutFile ./cester.h
 $Global:IncludePaths.Add($Global:MingWFolder32)
