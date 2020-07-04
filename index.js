@@ -134,7 +134,7 @@ function afterAll(params) {
         core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);    
         
         // compilers paths
-        core.setOutput("win32-clang-folder", "C:\\tools\\msys64\\" + ((params.selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
+        core.setOutput("win32-clang-gcc-folder", "C:\\msys64\\" + ((params.selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
         if (runCesterRegression === true) {
             var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
             console.log("Regression Result:")
@@ -182,10 +182,11 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             arch = "32";
         }
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc") || selectedCompiler.startsWith("clang")) {
+            var compiler = (selectedCompiler.startsWith("clang") ? "clang" : "gcc");
             if (file.endsWith('cpp') || file.endsWith('c++')) {
-                return `C:\\msys64\\mingw${arch}\\bin\\clang++.exe`;
+                return `C:\\msys64\\mingw${arch}\\bin\\${compiler}++.exe`;
             } else {
-                return `C:\\msys64\\mingw${arch}\\bin\\clang.exe`;
+                return `C:\\msys64\\mingw${arch}\\bin\\${compiler}.exe`;
             }
         }
     } else {
