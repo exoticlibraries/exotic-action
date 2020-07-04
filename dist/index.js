@@ -7298,10 +7298,6 @@ async function afterDownloadDeps() {
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
         var j;
-        if (selectedCompiler === "clang" && process.platform.startsWith("win")) {
-            // the clang compiler must have been installed for windows
-            await exec.exec("powershell -command \"[System.Environment]::SetEnvironmentVariable('Path', [environment]::GetEnvironmentVariable('Path', 'User') + ';C:\\tools\\msys64\\usr\\bin;C:\\tools\\msys64\\mingw64\\bin', 'User');\"");
-        }
         for (i = 0; i < testFolders.length; i++) {
             var folder = testFolders[i];
             if (!fs.existsSync(folder)) {
@@ -7429,8 +7425,15 @@ function strToArray(str, seperator) {
 function selectCompilerExec(selectedCompiler, file) {
     if (selectedCompiler.startsWith("gnu")) {
         return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
-    }
-    if (selectedCompiler.startsWith("clang")) {
+    } else if (selectedCompiler.startsWith("clang")) {
+        if (process.platform.startsWith("win")) {
+            // the clang compiler must have been installed for windows using install.ps1
+            if (file.endsWith('cpp') || file.endsWith('c++')) {
+                return "C:\\tools\\msys64\\mingw64\\bin\\clang++.exe";
+            } else {
+                return "C:\\tools\\msys64\\mingw64\\bin\\clang.exe";
+            }
+        }
         return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
     }
 }
