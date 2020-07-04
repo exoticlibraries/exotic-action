@@ -16,7 +16,6 @@ If ($args[2] -eq "clang") {
         pacman --noconfirm -S msys/make mingw64/mingw-w64-x86_64-clang
     }
     [System.Environment]::SetEnvironmentVariable('Path', 
-                        [environment]::GetEnvironmentVariable("Path","User") + ";C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin", 
-                        [System.EnvironmentVariableTarget]::User);
-    clang -v
+                        [environment]::GetEnvironmentVariable("Path","Machine") + ";C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin", 
+                        [System.EnvironmentVariableTarget]::Machine);
 }
