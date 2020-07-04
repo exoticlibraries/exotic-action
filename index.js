@@ -90,6 +90,7 @@ async function afterDownloadDeps() {
                 }
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
+                    await jsexec('echo "##[add-path]C:\\msys64\\mingw${arch}\\bin"');
                     console.log(command);
                     var { stdout, stderr } = await jsexec(command);
                     console.log(stdout); console.log(stderr);
