@@ -7340,7 +7340,7 @@ async function afterDownloadDeps() {
                     outputName += ".exe";
                     prefix = "";
                 }
-                var command = `${compiler} -v`;
+                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
                     var { stdout, stderr } = await jsexec(command);
                     console.log(stdout); console.log(stderr);
