@@ -7342,8 +7342,7 @@ async function afterDownloadDeps() {
                 }
                 var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. ${fullPath} -o ${outputName}`;
                 try {
-                    var { stdout, stderr } = await jsexec(command);
-                    console.log(stdout); console.log(stderr);
+                    await exec.exec(command);
                     var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
                     console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
@@ -7433,13 +7432,12 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         if (selectedArchNoFormat === "x86") {
             arch = "32";
         }
-        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc") || selectedCompiler.startsWith("clang")) {
-            // SET PATH=%PATH%;C:\\msys64\\mingw${arch}\\bin && 
-            if (file.endsWith('cpp') || file.endsWith('c++')) {
-                return (selectedCompiler.startsWith("clang") ? "clang++.exe" : "g++.exe");
-            } else {
-                return (selectedCompiler.startsWith("clang") ? "clang.exe" : "gcc.exe");
-            }
+        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
+            return ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe") 
+            
+        } else if (selectedCompiler.startsWith("clang")) {
+            return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe");
+            
         }
     } else {
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
