@@ -42,7 +42,8 @@ async function afterDownloadDeps() {
         numberOfTestsRan: 0,
         numberOfFailedTests: 0,
         numberOfTests: 0,
-        regressionOutput: ""
+        regressionOutput: "",
+        selectedArchNoFormat: selectedArchNoFormat
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
@@ -133,7 +134,7 @@ function afterAll(params) {
         core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);    
         
         // compilers paths
-        core.setOutput("win32-clang-folder", "C:\\tools\\msys64\\" + ((selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
+        core.setOutput("win32-clang-folder", "C:\\tools\\msys64\\" + ((params.selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
         if (runCesterRegression === true) {
             var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
             console.log("Regression Result:")
