@@ -176,7 +176,7 @@ function strToArray(str, seperator) {
 }
 
 function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
-    if (selectedCompiler.startsWith("gnu")) {
+    if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
         return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
     } else if (selectedCompiler.startsWith("clang")) {
         if (process.platform.startsWith("win")) {
