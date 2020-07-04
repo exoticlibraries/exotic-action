@@ -13,8 +13,8 @@ If ($args[1] -eq "x86") {
 
 "Downloading $NAME ..."
 Invoke-WebRequest https://raw.githubusercontent.com/exoticlibraries/libcester/master/include/exotic/cester.h -OutFile ./cester.h
-$Global:IncludePaths.Add(MingWFolder32)
-$Global:IncludePaths.Add(MingWFolder64)
+$Global:IncludePaths.Add($Global:MingWFolder32)
+$Global:IncludePaths.Add($Global:MingWFolder64)
 ForEach ($Path in $Global:IncludePaths) {
     If ( -not [System.IO.Directory]::Exists($Path)) {
         [System.IO.Directory]::CreateDirectory($Path) > $null
