@@ -183,7 +183,11 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             arch = "32";
         }
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
-            return ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe") 
+            if (selectedArchNoFormat === "x86") {
+                return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
+            } else {
+                return ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
+            }
             
         } else if (selectedCompiler.startsWith("clang")) {
             return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe");
