@@ -48,7 +48,7 @@ async function afterDownloadDeps() {
         var j;
         if (selectedCompiler === "clang" && process.platform.startsWith("win")) {
             // the clang compiler must have been installed for windows
-            await exec.exec("SET PATH=%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin");
+            await exec.exec(`SET PATH=%PATH%;C:\tools\msys64\usr\bin;C:\tools\msys64\mingw64\bin`);
         }
         for (i = 0; i < testFolders.length; i++) {
             var folder = testFolders[i];
