@@ -1,2 +1,11 @@
 
 node_modules/
+
+*.h
+*.c
+*.cpp
+*.c++
+*.exe
+*.zip
+*.o
+*.obj
