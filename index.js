@@ -90,9 +90,8 @@ async function afterDownloadDeps() {
                 }
                 var command = `${compiler} -v`;
                 try {
-                    console.log(command);
                     var { stdout, stderr } = await jsexec(command);
-                    onsole.log(stdout); console.log(stderr);
+                    console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
                     console.log(stdout); console.log(stderr);
                     var { stdout, stderr } = await jsexec(`rm ${outputName}`);
