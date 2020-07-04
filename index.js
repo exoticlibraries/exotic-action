@@ -183,15 +183,15 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         }
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
             if (file.endsWith('cpp') || file.endsWith('c++')) {
-                return `C:\msys64\mingw${arch}\bin\clang++.exe`;
+                return `C:\\msys64\\mingw${arch}\\bin\\clang++.exe`;
             } else {
-                return `C:\msys64\mingw${arch}\bin\clang.exe`;
+                return `C:\\msys64\\mingw${arch}\\bin\\clang.exe`;
             }
         } else if (selectedCompiler.startsWith("clang")) {
             if (file.endsWith('cpp') || file.endsWith('c++')) {
-                return `C:\msys64\clang${arch}\bin\clang++.exe`;
+                return `C:\\msys64\\clang${arch}\\bin\\clang++.exe`;
             } else {
-                return `C:\msys64\clang${arch}\bin\clang.exe`;
+                return `C:\\msys64\\clang${arch}\\bin\\clang.exe`;
             }
         }
     } else {

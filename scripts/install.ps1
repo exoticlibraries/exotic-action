@@ -20,9 +20,9 @@ If ($args[2] -eq "clang") {
 } #>
 
 If ($args[1] -eq "x86") {
-    $env:Path = "C:\msys64\clang32\bin;C:\msys64\mingw32\bin"
+    $env:Path += ";C:\msys64\clang32\bin;C:\msys64\mingw32\bin"
 } Else {
-    $env:Path = "C:\msys64\clang64\bin;C:\msys64\mingw64\bin"
+    $env:Path += ";C:\msys64\clang64\bin;C:\msys64\mingw64\bin"
 }
 Set-ExecutionPolicy Bypass -Scope Process -Force; 
 iex ((New-Object System.Net.WebClient).DownloadString('https://exoticlibraries.github.io/libcester/cester.ps1'))
