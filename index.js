@@ -71,18 +71,16 @@ async function afterDownloadDeps() {
                         skip = false;
                         return false;
                     }
+                    return true;
                 });
                 if (skip === true) { continue; }
-                console.log("Another one Checking : " + file + " with " + testExludeFilePatterns);
                 testExludeFilePatterns.every(function (pattern, index) {
-                    console.log("Checking : " + file + " with " + testExludeFilePatterns + " is " + (new RegExp(pattern).test(file)));
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
-                        console.log("Exclude this file1: " + file + " with " + skip );
                         return false;
                     }
+                    return true;
                 });
-                console.log("Exclude this file2: " + file + " with " + skip );
                 if (skip === true) { continue; }
                 
                 params.numberOfTests++;
