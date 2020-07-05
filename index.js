@@ -50,6 +50,7 @@ async function afterDownloadDeps() {
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
         var j;
+        var k;
         for (i = 0; i < testFolders.length; i++) {
             var folder = testFolders[i];
             if (!fs.existsSync(folder)) {
@@ -66,21 +67,21 @@ async function afterDownloadDeps() {
             for (j = 0; j < files.length; ++j) {
                 var file = files[j];
                 var skip = true;
-                testFilePatterns.every(function (pattern, index) {
+                for (k = 0; k < testFilePatterns.length; k++) {
+                    var pattern = testFilePatterns[k];
                     if (new RegExp(pattern).test(file)) {
                         skip = false;
-                        return false;
+                        break;
                     }
-                    return true;
-                });
+                }
                 if (skip === true) { continue; }
-                testExludeFilePatterns.every(function (pattern, index) {
+                for (k = 0; k < testExludeFilePatterns.length; k++) {
+                    var pattern = testExludeFilePatterns[k];
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
                         return false;
                     }
-                    return true;
-                });
+                }
                 if (skip === true) { continue; }
                 
                 params.numberOfTests++;
