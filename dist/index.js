@@ -7283,10 +7283,12 @@ function main() {
 async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
-    const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-noisolation --cester-nomemtest');
+    const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-verbose --cester-nomemtest');
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
-    const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ 'mock+' ]);
+    const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
+    const testExludeFilePatternsx86 = getAndSanitizeInputs('test-exclude-file-pattern-x86', 'array', [ ]);
+    const testExludeFilePatternsx64 = getAndSanitizeInputs('test-exclude-file-pattern-x86', 'array', [ ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
@@ -7318,25 +7320,22 @@ async function afterDownloadDeps() {
             }
             for (j = 0; j < files.length; ++j) {
                 var file = files[j];
-                var skip = true;
-                for (k = 0; k < testFilePatterns.length; k++) {
-                    var pattern = testFilePatterns[k];
-                    //console.log(" ==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
-                    if (new RegExp(pattern).test(file)) {
-                        skip = false;
-                        break;
+                if (!matchesInArray(testFilePatterns, file)) {
+                    continue;
+                }
+                if (matchesInArray(testExludeFilePatterns, file)) {
+                    continue;
+                }
+                if (selectedArchNoFormat == "x86") {
+                    if (matchesInArray(testExludeFilePatternsx86, file)) {
+                        continue;
                     }
                 }
-                if (skip === true) { continue; }
-                for (k = 0; k < testExludeFilePatterns.length; k++) {
-                    var pattern = testExludeFilePatterns[k];
-                    //console.log(" <==" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
-                    if (new RegExp(pattern).test(file)) {
-                        skip = true;
-                        break;
+                if (selectedArchNoFormat.indexOf("x64") !== -1) {
+                    if (matchesInArray(testExludeFilePatternsx64, file)) {
+                        continue;
                     }
                 }
-                if (skip === true) { continue; }
                 
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
@@ -7412,6 +7411,17 @@ function afterAll(params) {
     }
 }
 
+function matchesInArray(patternArray, text) {
+    var k;
+    for (k = 0; k < patternArray.length; k++) {
+        var pattern = patternArray[k];
+        //console.log(" <==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
+        if (new RegExp(pattern).test(text)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 function getAndSanitizeInputs(key, type, defaultValue) {
     var value = core.getInput(key);
