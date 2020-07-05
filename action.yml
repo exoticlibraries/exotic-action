@@ -19,7 +19,6 @@ inputs:
     required: false
     default: |
         test/
-        tests/
     
   test-file-pattern: 
     description: 'A regex pattern to match the file to run in each of the provided test folder'

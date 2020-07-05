@@ -7328,9 +7328,11 @@ async function afterDownloadDeps() {
                 testExludeFilePatterns.every(function (pattern, index) {
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
+                        console.log("Exclude this file1: " + file + " with " + skip );
                         return false;
                     }
                 });
+                console.log("Exclude this file1: " + file + " with " + skip );
                 if (skip === true) { continue; }
                 
                 params.numberOfTests++;
