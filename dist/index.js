@@ -7331,7 +7331,7 @@ async function afterDownloadDeps() {
                     var pattern = testExludeFilePatterns[k];
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
-                        return false;
+                        break;
                     }
                 }
                 if (skip === true) { continue; }
