@@ -7321,7 +7321,7 @@ async function afterDownloadDeps() {
                 var skip = true;
                 for (k = 0; k < testFilePatterns.length; k++) {
                     var pattern = testFilePatterns[k];
-                    console.log(" ==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
+                    //console.log(" ==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
                     if (new RegExp(pattern).test(file)) {
                         skip = false;
                         break;
@@ -7330,7 +7330,7 @@ async function afterDownloadDeps() {
                 if (skip === true) { continue; }
                 for (k = 0; k < testExludeFilePatterns.length; k++) {
                     var pattern = testExludeFilePatterns[k];
-                    console.log(" <==" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
+                    //console.log(" <==" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
                     if (new RegExp(pattern).test(file)) {
                         skip = true;
                         break;
