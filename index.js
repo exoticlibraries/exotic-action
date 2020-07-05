@@ -37,6 +37,9 @@ async function afterDownloadDeps() {
     const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
     const testExludeFilePatternsx86 = getAndSanitizeInputs('test-exclude-file-pattern-x86', 'array', [ ]);
     const testExludeFilePatternsx64 = getAndSanitizeInputs('test-exclude-file-pattern-x64', 'array', [ ]);
+    const testExludeFilePatternsxMacOS = getAndSanitizeInputs('test-exclude-file-pattern-macos', 'array', [ ]);
+    const testExludeFilePatternsxLinux = getAndSanitizeInputs('test-exclude-file-pattern-linux', 'array', [ ]);
+    const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
@@ -81,6 +84,19 @@ async function afterDownloadDeps() {
                 }
                 if (selectedArchNoFormat.indexOf("x64") !== -1) {
                     if (matchesInArray(testExludeFilePatternsx64, file)) {
+                        continue;
+                    }
+                }
+                if (process.platform === "darwin") {
+                    if (matchesInArray(testExludeFilePatternsxMacOS, file)) {
+                        continue;
+                    }
+                } else if (process.platform === "linux") {
+                    if (matchesInArray(testExludeFilePatternsxLinux, file)) {
+                        continue;
+                    }
+                } else if (process.platform.startsWith("win")) {
+                    if (matchesInArray(testExludeFilePatternsxWindows, file)) {
                         continue;
                     }
                 }

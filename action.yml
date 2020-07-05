@@ -45,6 +45,21 @@ inputs:
     default: |
         test_shared_data+
     
+  test-exclude-file-pattern-macos: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on MacOS'
+    required: false
+    default: 
+    
+  test-exclude-file-pattern-linux: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on Linux'
+    required: false
+    default: 
+    
+  test-exclude-file-pattern-windows: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on Windows'
+    required: false
+    default: 
+    
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'
     required: false
