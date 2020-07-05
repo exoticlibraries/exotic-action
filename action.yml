@@ -33,6 +33,18 @@ inputs:
     default: |
         mock+
     
+  test-exclude-file-pattern-x86: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on x86 platform only'
+    required: false
+    default: |
+        test_shared_data+
+    
+  test-exclude-file-pattern-x64: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on x64 platform only'
+    required: false
+    default: |
+        test_shared_data+
+    
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'
     required: false
