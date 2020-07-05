@@ -83,6 +83,7 @@ async function afterDownloadDeps() {
                     }
                 }
                 if (skip === true) { continue; }
+                console.log(file + " Passes check");
                 
                 params.numberOfTests++;
                 var fullPath = path.join(folder, file);
