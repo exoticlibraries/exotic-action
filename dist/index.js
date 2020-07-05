@@ -7325,6 +7325,7 @@ async function afterDownloadDeps() {
                     }
                 });
                 if (skip === true) { continue; }
+                console.log("Another one Checking : " + file + " with " + testExludeFilePatterns);
                 testExludeFilePatterns.every(function (pattern, index) {
                     console.log("Checking : " + file + " with " + testExludeFilePatterns + " is " + (new RegExp(pattern).test(file)));
                     if (new RegExp(pattern).test(file)) {
