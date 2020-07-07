@@ -72,6 +72,7 @@ inputs:
     default: |
         --cester-verbose
         --cester-nomemtest
+        --cester-version
     
   install-compilers:
     description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'
