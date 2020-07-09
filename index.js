@@ -45,6 +45,8 @@ async function afterDownloadDeps() {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     const exoIncludePath = homedir + "/.yo/include/";
+    console.log(`-I${exoIncludePath}`);
+    var { stdout, stderr } = await jsexec("ls " + exoIncludePath);
     
     var params = {
         numberOfTestsRan: 0,
@@ -146,9 +148,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             outputName += ".exe";
             prefix = "";
         }
-        console.log(`-I${yamlParams.exoIncludePath}`);
         var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
-        console.log("TO RUN");
         console.log(command);
         //(async function(command, prefix, outputName, yamlParams) {
         try {
