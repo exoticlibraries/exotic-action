@@ -103,7 +103,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         var fullPath = path.join(folder, file);
         if (fs.lstatSync(fullPath).isDirectory()) {
             if (yamlParams.testFolderRecursive === true) {
-                await iterateFolderAndExecute(file, params, yamlParams);
+                await iterateFolderAndExecute(fullPath, params, yamlParams);
             }
             continue;
         }
