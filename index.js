@@ -98,12 +98,15 @@ function iterateFolderAndExecute(folder, params, yamlParams) {
       reportProgress(params);
       return;
     }
+    var j;
+    console.log("File Length: " + files.length);
     for (j = 0; j < files.length; ++j) {
         var file = files[j];
         var fullPath = path.join(folder, file);
+        console.log("For file into :" + fullPath);
         if (fs.lstatSync(fullPath).isDirectory()) {
             if (yamlParams.testFolderRecursive === true) {
-                console.log("Scanning :" + fullPath);
+                console.log("Scanning into :" + fullPath);
                 iterateFolderAndExecute(fullPath, params, yamlParams);
             }
             continue;
