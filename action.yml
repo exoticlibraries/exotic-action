@@ -9,13 +9,13 @@ inputs:
     required: false
     default: true
     
-  run-cester-regression: 
+  run-regression: 
     description: 'If false skip running the test files under test folders'
     required: false
-    default: true
+    default: false
     
   test-folders: 
-    description: 'Array of folders to run cester regression test in.'
+    description: 'Array of folders to run regression test in.'
     required: false
     default: |
         test/
@@ -66,7 +66,7 @@ inputs:
     default: |
         -pedantic
     
-  cester-options: 
+  regression-cli-options: 
     description: 'If false skip running the test files under test folders'
     required: false
     default: |

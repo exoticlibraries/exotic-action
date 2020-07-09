@@ -1,2 +1,182 @@
-# exotic-action
-Download exotic libraries into your GitHub Action environment for CI, CD and Tests Automation. Any file that begins with test_ in test or tests folder is run excepted exluded
+
+![](./exotic-action.png?2)
+
+# Exotic Action
+
+This GitHub Action will automatically download all [exotic libraries](https://exoticlibraries.github.io/) into your repo workflow environment. It can also be configured to run regression test on your project.
+
+You can include the action in your workflow to trigger on any event that GitHub actions supports. Your workflow will need to include the actions/checkout step if you wish to run regression test on your project.
+
+You can view an example of this below.
+
+```yaml
+name: CI with C/C++ Exotic Action
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        platform: [x86, x64]
+        compiler: [gnu, clang]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Setup Exotic Libraries
+        uses: exoticlibraries/exotic-action@v1
+        with:
+          download-exotic-libraries: true
+          run-regression: false
+```
+
+The example above only install the exotic libraries into the environment and does not run regression test. To run regression set the value of `run-cester-regression` to true, in a situation where the action is used to run regression only set the value of `download-exotic-libraries` to false to disable downloading exotic libraries. For more detail on configuring the regression see the section [Regression Test](#regression-test).
+
+___
+## Table of content
+- [Configuration](#configuration)
+  - [Output variables](#output-variables)
+- [Operating System Support](#operating-system-support)
+  - [Job Graph](#job-graph)
+- [Test Compilation](#test-compilation)
+- [Regression Test](#regression-test)
+  - [Using libcester](#using-libcester)
+  - [Using any other method](#using-any-other-method)
+- [How it works](#how-it-works)
+- [Contributing](#contributing)
+- [References](#references)
+- [License](#license)
+
+## Configuration
+
+The `with` portion of the workflow can be configured before the action will work. You can add these in the with section found in the examples above. None of the option is required.
+
+| Key          | Value Information | DataType | Required | Example |
+| ------------ | ----------------- | --------- | -------- | -------- |
+|  `download-exotic-libraries` | This option if set to false will skip downloading the exotic libraries and just continue to run the regression test. The default value is true. | boolean | No     |   `download-exotic-librarie: true`       |
+
+### Output variables
+
+
+## Operating System Support
+
+This action is suport the following operating systems. 
+
+- Windows 
+- MacOS
+- Linux
+
+In your workflow job configuration you can set the runs-on property to any of `macos-latest`, `ubuntu-20.04`, `ubuntu-18.04`, `ubuntu-20.04`, `ubuntu-latest`, `windows-latest` or any variant of the three platform. Both the **x86** and **x64** platform is supported and can be specified in the `matrix.platform` option. If the platform option x86 is specified for macos it is ignored and x64 version of macosx is initialized as the x86 platform is long deprecated. 
+
+The following compiler is supported in the action. 
+
+- gcc
+- clang
+- ~cl (Not Yet)~
+
+If any or combination of the compiler above is specified the compiler will be used to compile each test file in the tests folder. 
+
+The example below show a workflow setup that runs on all the three os (latest) with the supported compilers on the x86 and x64 platform.
+
+```yaml
+#...
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        platform: [x86, x64]
+        compiler: [gnu, clang]
+#...
+```
+
+The matrix configuration above will creates 12 jobs
+
+### Job Graph
+
+**x86 - 6 jobs**
+
+|  | macosx-latest | ubuntu-latest | windows-latest |
+| ------ | ------ | ------- | ------- |
+| gnu    |  X      |     X    |    X     |
+| clang  |  X      |     X    |    X     |
+
+**x64 - 6 jobs**
+
+|  | macosx-latest | ubuntu-latest | windows-latest |
+| ------ | ------ | ------- | ------- |
+| gnu    |  X      |     X    |    X     |
+| clang  |  X      |     X    |    X     |
+
+## Test Compilation
+
+Using the last sample `runs-on` configuration above, on each of the job the platform, os, and compiler affects the way the test is ran. On any Job running on the x86 platform the flag `-m32` will be issued during compilation on the x64 platform the flag `-m64` will be issued to the compiler.
+
+The action option `compiler-options-for-tests` can be used to add more flag to issue during compilation. E.g. to compile the test `test_json_parser.cpp` on x86 platform the command is executed:
+
+```bash
+g++ -m32 -I. test_json_parser.cpp -o out
+```
+
+To add more option e.g. to report more error, the `compiler-options-for-tests` can be set with the flags option like the example below:
+
+```yaml
+#...
+      - name: Run Regression
+        uses: exoticlibraries/exotic-action@v1
+        with:
+          download-exotic-libraries: false
+          run-regression: true
+          compiler-options-for-tests: |
+            -O2 
+            -Wall 
+            -Wpointer-arith 
+            -Wmissing-noreturn
+```
+
+With the extra configurations above the test `test_json_parser.cpp` is compiled with the extra flags like:
+
+```bash
+g++ -m32 -O2 -Wall -Wpointer-arith -Wmissing-noreturn -I. test_json_parser.cpp -o out
+```
+
+## Regression Test
+
+
+### Using libcester
+
+
+### Using any other method
+
+
+
+
+## How it works
+
+The main source file used in the project is [dist/index.js](https://github.com/exoticlibraries/exotic-action/blob/master/dist/index.js) which is a compiled version of [index.js](https://github.com/exoticlibraries/exotic-action/blob/master/dist/index.js) compiled using [zeit/ncc](https://github.com/zeit/ncc). The reason for the compiled version is to prevent commiting the node_modules folder and instead use compiled index.js as described [here](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github).
+
+Exotic Action determined the environment Operating system and platform from the build matrix, `matrix.os`, `matrix.platform` and `matrix.compiler`. The three options determine what compiler and version of the exotic libraries to download. If the *matrix.platform* value is x86 the flag `-m32` will be issued to the compiler and if the value is `x64` the flag `-m64` will be issued. On the windows platform the powershell script [scripts/install.ps1](https://github.com/exoticlibraries/exotic-action/blob/master/scripts/install.ps1) is invoked to install the correct libraries and on other platforms (mac and linux) [scripts/install.sh](https://github.com/exoticlibraries/exotic-action/blob/master/scripts/install.ps1) is invoked to download the libraries. On windows it uses the clang and gcc installed by default in the folder `C:\\msys64\\mingw32|mingw64\\bin\\`, the folder is exported as output parameter for use in other step as `win32-clang-gcc-folder`.
+
+It optional to download the libraries incase the action is to be used to run regression only, setting the option `download-exotic-libraries` to false skip the exotic libraries install phase. If the `run-regression` option is set to true, each file in the test folders matching the file patterns is compiled and executed. See the sections above on setting the compilation and runtime cli options.
+
+## Contributing
+
+If you have any issue or you want to request a feature you can open a request [here](https://github.com/exoticlibraries/libcester/issues/new/choose) anytime and if you made some changes that should be added to the main project send in a [pull request](https://github.com/Thecarisma/Cronux/compare). 
+
+## References
+
+ - [About Actions](https://docs.github.com/en/actions/creating-actions/about-actions)
+ - [Creating a JavaScript action](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action)
+ - [Publishing actions in GitHub Marketplace](hhttps://docs.github.com/en/actions/creating-actions/publishing-actions-in-github-marketplace)
+ - [Exotic Libraries](https://exoticlibraries.github.io/)
+ - [Author](https://thecarisma.github.io/)
+
+## License
+
+MIT License Copyright (c) 2020, Adewale Azeez
