@@ -7283,7 +7283,7 @@ function main() {
 async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
-    const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', '--cester-verbose --cester-nomemtest');
+    const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
     const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
