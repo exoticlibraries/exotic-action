@@ -100,9 +100,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
     for (j = 0; j < files.length; ++j) {
         var file = files[j];
         var fullPath = path.join(folder, file);
-        console.log("File is : " + file);
-        if (fs.lstatSync(file).isDirectory()) {
-            Console.log("In folder " + file);
+        if (fs.lstatSync(fullPath).isDirectory()) {
             if (yamlParams.testFolderRecursive === true) {
                 iterateFolderAndExecute(file, params, yamlParams);
             }
