@@ -7297,8 +7297,6 @@ async function afterDownloadDeps() {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     const exoIncludePath = homedir + "/.yo/include/";
-    console.log(`-I${exoIncludePath}`);
-    var { stdout, stderr } = await jsexec("ls " + exoIncludePath);
     
     var params = {
         numberOfTestsRan: 0,
@@ -7413,6 +7411,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             params.numberOfTestsRan++;
             params.regressionOutput += `\nPASSED ${outputName}`;
         } catch (error) {
+            console.log(`WE HERE -I${yamlParams.exoIncludePath}`);
             params.numberOfFailedTests++;
             params.numberOfTestsRan++;
             params.regressionOutput += `\nFAILED ${outputName}`;
