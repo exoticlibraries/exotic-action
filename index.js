@@ -30,8 +30,8 @@ function main() {
 // TODO: treats install-compilers
 async function afterDownloadDeps() {
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
-    const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
-    const cesterOpts = getAndSanitizeInputs('cester-options', 'flatten_string', '--cester-verbose --cester-nomemtest');
+    const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
+    const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', '--cester-verbose --cester-nomemtest');
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
     const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
     const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
@@ -149,7 +149,7 @@ function reportProgress(params) {
 
 function afterAll(params) {
     try {
-        const runCesterRegression = getAndSanitizeInputs('run-cester-regression', 'boolean', true);
+        const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
         
         core.setOutput("tests-passed", (params.numberOfFailedTests === 0));
         core.setOutput("tests-count", params.numberOfTests);

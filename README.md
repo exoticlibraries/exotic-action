@@ -1,5 +1,5 @@
 
-![](./exotic-action.png?2)
+![](https://github.com/exoticlibraries/exotic-action/raw/master/exotic-action.png)
 
 # Exotic Action
 
@@ -104,15 +104,15 @@ The matrix configuration above will creates 12 jobs
 
 |  | macosx-latest | ubuntu-latest | windows-latest |
 | ------ | ------ | ------- | ------- |
-| gnu    |  X      |     X    |    X     |
-| clang  |  X      |     X    |    X     |
+| gnu    |  1      |     2    |    3     |
+| clang  |  4      |     5    |    6     |
 
 **x64 - 6 jobs**
 
 |  | macosx-latest | ubuntu-latest | windows-latest |
 | ------ | ------ | ------- | ------- |
-| gnu    |  X      |     X    |    X     |
-| clang  |  X      |     X    |    X     |
+| gnu    |  7      |     8    |    9     |
+| clang  |  10      |     11    |    12     |
 
 ## Test Compilation
 
