@@ -52,7 +52,6 @@ async function afterDownloadDeps() {
         regressionOutput: "",
         selectedArchNoFormat: selectedArchNoFormat
     }
-    console.log("WE HERE: " + runCesterRegression);
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
         var j;
