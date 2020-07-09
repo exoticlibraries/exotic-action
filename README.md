@@ -254,7 +254,7 @@ If you have any issue or you want to request a feature you can open a request [h
 
  - [About Actions](https://docs.github.com/en/actions/creating-actions/about-actions)
  - [Creating a JavaScript action](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action)
- - [Publishing actions in GitHub Marketplace](hhttps://docs.github.com/en/actions/creating-actions/publishing-actions-in-github-marketplace)
+ - [Publishing actions in GitHub Marketplace](https://docs.github.com/en/actions/creating-actions/publishing-actions-in-github-marketplace)
  - [Exotic Libraries](https://exoticlibraries.github.io/)
  - [Author](https://thecarisma.github.io/)
 
