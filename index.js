@@ -146,6 +146,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             outputName += ".exe";
             prefix = "";
         }
+        console.log(`-I${yamlParams.exoIncludePath}`);
         var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
         console.log("TO RUN");
         console.log(command);
