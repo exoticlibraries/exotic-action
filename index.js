@@ -74,7 +74,7 @@ async function afterDownloadDeps() {
         var k;
         for (i = 0; i < testFolders.length; i++) {
             var folder = testFolders[i];
-            if (!fs.existsSync(folder) || !fs.lstatSync(file).isDirectory()) {
+            if (!fs.existsSync(folder) || !fs.lstatSync(folder).isDirectory()) {
                 core.setFailed("The test folder does not exist: " + folder);
                 reportProgress(params);
                 return;
