@@ -148,7 +148,6 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         }
         var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
         console.log(command);
-        //(async function(command, prefix, outputName, yamlParams) {
         try {
             var { stdout, stderr } = await jsexec(command);
             console.log(stdout); console.log(stderr);
@@ -159,7 +158,6 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             params.numberOfTestsRan++;
             params.regressionOutput += `\nPASSED ${outputName}`;
         } catch (error) {
-            console.log(`WE HERE -I${yamlParams.exoIncludePath}`);
             params.numberOfFailedTests++;
             params.numberOfTestsRan++;
             params.regressionOutput += `\nFAILED ${outputName}`;
@@ -169,7 +167,6 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
                 console.error(error);
             }
         }
-        //})(command, prefix, outputName, yamlParams)
     }
 }
 
