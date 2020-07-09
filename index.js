@@ -147,9 +147,10 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             prefix = "";
         }
         var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+        console.log("TO RUN");
+        console.log(command);
         //(async function(command, prefix, outputName, yamlParams) {
         try {
-            console.log(command);
             var { stdout, stderr } = await jsexec(command);
             console.log(stdout); console.log(stderr);
             var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
