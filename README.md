@@ -65,11 +65,11 @@ ___
 
 The `with` portion of the workflow can be configured before the action will work. You can add these in the with section found in the examples above. None of the option is required.
 
-| Key | Value Information | DataType | Required | 
-| ------------ | ----------------- | --------- | -------- | -------- |
+| Key <img width=600/> | Value Information | DataType <img width=200/> | Required | 
+| ------------ | ----------------- | --------- | -------- |
 |  `download-exotic-libraries` | This option if set to false will skip downloading the exotic libraries and just continue to run the regression test. The default value is true. | boolean | No     |
 | `run-regression` | Set the option to indicate whethere the action should run regression on the matching test files in the test folder. The default value is false. | boolean | No | 
-| `test-folders` | The list of folder to search for the tsst files to compile and execute. The default value is `test/` | Multiline String | No | 
+| `test-folders` | The list of folder to search for the tsst files to compile and execute. The default value is `test/`. The values should be relative to the repo folder structure. | Multiline String | No | 
 | `test-folder-recursive` | Set this option to true to search for matching test file recursively in test folders. The default is false. | boolean | No |
 | `test-file-pattern` | List of multiline regex strings to match files to run in the test folders. The default is `^test_` `_test[.c](c\+\+|cpp|c)` | Multiline Regex | No | 
 | `test-exclude-file-pattern` | List of multiline regex strings to match files to skip when searching for test files in the test folders. | Multiline Regex | No |
