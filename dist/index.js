@@ -7351,14 +7351,11 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
       return;
     }
     var j;
-    console.log("File Length: " + files.length);
     for (j = 0; j < files.length; ++j) {
         var file = files[j];
         var fullPath = path.join(folder, file);
-        console.log("For file into :" + fullPath);
         if (fs.lstatSync(fullPath).isDirectory()) {
             if (yamlParams.testFolderRecursive === true) {
-                console.log("Scanning into :" + fullPath);
                 await iterateFolderAndExecute(fullPath, params, yamlParams);
             }
             continue;

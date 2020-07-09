@@ -65,7 +65,7 @@ ___
 
 The `with` portion of the workflow can be configured before the action will work. You can add these in the with section found in the examples above. None of the option is required.
 
-| Key <img width=650/> | Value Information | DataType <img width=200/> | Required | 
+| Key | Value Information | DataType | Required | 
 | ------------ | ----------------- | --------- | -------- | -------- |
 |  `download-exotic-libraries` | This option if set to false will skip downloading the exotic libraries and just continue to run the regression test. The default value is true. | boolean | No     |
 | `run-regression` | Set the option to indicate whethere the action should run regression on the matching test files in the test folder. The default value is false. | boolean | No | 
