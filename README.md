@@ -33,6 +33,16 @@ jobs:
         with:
           download-exotic-libraries: true
           run-regression: false
+          test-folders: |
+            test/
+          test-file-pattern: |
+            ^test_
+          compiler-options-for-tests: |
+            -O2 
+            -Wall
+          regression-cli-options: |
+            --show-version
+            --verbose
 ```
 
 The example above only install the exotic libraries into the environment and does not run regression test. To run regression set the value of `run-cester-regression` to true, in a situation where the action is used to run regression only set the value of `download-exotic-libraries` to false to disable downloading exotic libraries. For more detail on configuring the regression see the section [Regression Test](#regression-test).
@@ -42,11 +52,10 @@ ___
 - [Configuration](#configuration)
   - [Output variables](#output-variables)
 - [Operating System Support](#operating-system-support)
-  - [Job Graph](#job-graph)
+  - [Job Table](#job-table)
 - [Test Compilation](#test-compilation)
 - [Regression Test](#regression-test)
-  - [Using libcester](#using-libcester)
-  - [Using any other method](#using-any-other-method)
+- [Runtime Options](#runtime-options)
 - [How it works](#how-it-works)
 - [Contributing](#contributing)
 - [References](#references)
@@ -56,9 +65,21 @@ ___
 
 The `with` portion of the workflow can be configured before the action will work. You can add these in the with section found in the examples above. None of the option is required.
 
-| Key          | Value Information | DataType | Required | Example |
+| Key <img width=650/> | Value Information | DataType <img width=200/> | Required | 
 | ------------ | ----------------- | --------- | -------- | -------- |
-|  `download-exotic-libraries` | This option if set to false will skip downloading the exotic libraries and just continue to run the regression test. The default value is true. | boolean | No     |   `download-exotic-librarie: true`       |
+|  `download-exotic-libraries` | This option if set to false will skip downloading the exotic libraries and just continue to run the regression test. The default value is true. | boolean | No     |
+| `run-regression` | Set the option to indicate whethere the action should run regression on the matching test files in the test folder. The default value is false. | boolean | No | 
+| `test-folders` | The list of folder to search for the tsst files to compile and execute. The default value is `test/` | Multiline String | No | 
+| `test-folder-recursive` | Set this option to true to search for matching test file recursively in test folders. The default is false. | boolean | No |
+| `test-file-pattern` | List of multiline regex strings to match files to run in the test folders. The default is `^test_` `_test[.c](c\+\+|cpp|c)` | Multiline Regex | No | 
+| `test-exclude-file-pattern` | List of multiline regex strings to match files to skip when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-x86` | List of multiline regex strings to match files to skip on the x86 platform when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-x64` | List of multiline regex strings to match files to skip on the x64 platform when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-macos` | List of multiline regex strings to match files to skip on MacOS when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-linux` | List of multiline regex strings to match files to skip on linux os when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-windows` | List of multiline regex strings to match files to skip on windows os when searching for test files in the test folders. | Multiline Regex | No |
+| `compiler-options-for-tests` | The multiline string of flags to pass to the compiler when compiling the test files. | Multiline String | No |
+| `regression-cli-options` | The multiline string of flags to pass to the compiled executable when running it. | Multiline String | No |
 
 ### Output variables
 
@@ -98,19 +119,15 @@ jobs:
 
 The matrix configuration above will creates 12 jobs
 
-### Job Graph
+### Job Table
 
-**x86 - 6 jobs**
 
 |  | macosx-latest | ubuntu-latest | windows-latest |
 | ------ | ------ | ------- | ------- |
+| **x86 (6 jobs)** |
 | gnu    |  1      |     2    |    3     |
 | clang  |  4      |     5    |    6     |
-
-**x64 - 6 jobs**
-
-|  | macosx-latest | ubuntu-latest | windows-latest |
-| ------ | ------ | ------- | ------- |
+| **x64 (6 jobs)** |
 | gnu    |  7      |     8    |    9     |
 | clang  |  10      |     11    |    12     |
 
@@ -118,7 +135,7 @@ The matrix configuration above will creates 12 jobs
 
 Using the last sample `runs-on` configuration above, on each of the job the platform, os, and compiler affects the way the test is ran. On any Job running on the x86 platform the flag `-m32` will be issued during compilation on the x64 platform the flag `-m64` will be issued to the compiler.
 
-The action option `compiler-options-for-tests` can be used to add more flag to issue during compilation. E.g. to compile the test `test_json_parser.cpp` on x86 platform the command is executed:
+The action option `compiler-options-for-tests` can be used to add more flag for compilation. E.g. to compile the test `test_json_parser.cpp` on x86 platform the command is executed:
 
 ```bash
 g++ -m32 -I. test_json_parser.cpp -o out
@@ -148,14 +165,78 @@ g++ -m32 -O2 -Wall -Wpointer-arith -Wmissing-noreturn -I. test_json_parser.cpp -
 
 ## Regression Test
 
+The action looks at the values of the option `test-folders` to determine the folder to begin testing. The default folder where the test file is searched for is `test/`, more test folder can be added or changed in your configuration incase the test file is in other or multiple folder. The search for test file is non-recursive by default to make the action look into subfolders of the test folders set the value of `test-folder-recursive` to true.
 
-### Using libcester
+ Since the action is built to run C and C++ test files the following file pattern is searched for in the provided test folders `^test_`, `_test[.c](c\+\+|cpp|c)` the two patterns matches a file that it name starts with test_ or ends with _test.c or _test.cpp. More pattern can be added to the option `test-file-pattern` for other file name. 
 
+The example below shows how to add the test folders, disable recursive search in test folder and add more matching file pattern.
 
-### Using any other method
+```yaml
+#...
+      - name: Run Regression
+        uses: exoticlibraries/exotic-action@v1
+        with:
+          download-exotic-libraries: false
+          run-regression: true
+          test-folders: |
+            test/
+            tests/
+          test-folder-recursive: false
+          test-file-pattern: |
+            ^test_
+            _test[.c](c\+\+|cpp|c)
+            _test.cxx
+            _test.uno
+```
 
+To exclude some folder from compilation and execution it can be added to the `test-exclude-file-pattern` option. E.g. to exclude some files that requires system resources from executed:
 
+```yaml
+#...
+      - name: Run Regression
+        uses: exoticlibraries/exotic-action@v1
+        with:
+          download-exotic-libraries: false
+          run-regression: true
+          test-folders: |
+            test/
+            tests/
+          test-exclude-file-pattern: |
+            system_+
+            win32_+ 
+```
 
+Any file starting with *system_* and *win32_* will be skipped during the test file search. There are also other file exclude options for various platform and os, `test-exclude-file-pattern-x86`, `test-exclude-file-pattern-x64`, `test-exclude-file-pattern-macos`, `test-exclude-file-pattern-linux`and `test-exclude-file-pattern-windows`.
+
+  > The Action can be configured to run other programming language files by setting the appropriate values for the `compiler-options-for-tests` and `regression-cli-options`options.
+
+## Runtime Options
+
+To send a flag to the compiled executable, add the flags to the `regression-cli-options` option. E.g. a compiled executable is executed as:
+
+```bash
+./test_assert
+```
+
+The sample configuration below shows how to add runtime option to the executable:
+
+```yaml
+#...
+      - name: Run Regression
+        uses: exoticlibraries/exotic-action@v1
+        with:
+          download-exotic-libraries: false
+          run-regression: true
+          regression-cli-options: |
+            --show-version
+            --verbose
+```
+
+The executable will be executed with the provided flags like below:
+
+```bash
+./test_assert --show-version --verbose
+```
 
 ## How it works
 

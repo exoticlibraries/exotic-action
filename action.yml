@@ -20,6 +20,11 @@ inputs:
     default: |
         test/
     
+  test-folder-recursive: 
+    description: 'If true the action searches for the test file in the specified test folders recursivly'
+    required: false
+    default: false
+    
   test-file-pattern: 
     description: 'A regex pattern to match the file to run in each of the provided test folder'
     required: false

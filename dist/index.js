@@ -7285,6 +7285,7 @@ async function afterDownloadDeps() {
     const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
+    const testFolderRecursive = getAndSanitizeInputs('test-folder-recursive', 'boolean', false);
     const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
     const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
     const testExludeFilePatternsx86 = getAndSanitizeInputs('test-exclude-file-pattern-x86', 'array', [ ]);
@@ -7304,87 +7305,115 @@ async function afterDownloadDeps() {
         regressionOutput: "",
         selectedArchNoFormat: selectedArchNoFormat
     }
+    var yamlParams = {
+        compilerOptsForTests: compilerOptsForTests,
+        cesterOpts: cesterOpts,
+        testFolderRecursive: testFolderRecursive,
+        testFilePatterns: testFilePatterns,
+        testExludeFilePatterns: testExludeFilePatterns,
+        testExludeFilePatternsx86: testExludeFilePatternsx86,
+        testExludeFilePatternsx64: testExludeFilePatternsx64,
+        testExludeFilePatternsxMacOS: testExludeFilePatternsxMacOS,
+        testExludeFilePatternsxLinux: testExludeFilePatternsxLinux,
+        testExludeFilePatternsxWindows: testExludeFilePatternsxWindows,
+        selectedCompiler: selectedCompiler,
+        exoIncludePath: exoIncludePath,
+        selectedArch: selectedArch
+    }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
         var i;
         var j;
         var k;
         for (i = 0; i < testFolders.length; i++) {
             var folder = testFolders[i];
-            if (!fs.existsSync(folder)) {
+            if (!fs.existsSync(folder) || !fs.lstatSync(file).isDirectory()) {
                 core.setFailed("The test folder does not exist: " + folder);
                 reportProgress(params);
                 return;
             }
-            var files = fs.readdirSync(folder);
-            if (!files) {
-              core.setFailed("Could not list the content of test folder: " + folder);
-              reportProgress(params);
-              return;
-            }
-            for (j = 0; j < files.length; ++j) {
-                var file = files[j];
-                if (!matchesInArray(testFilePatterns, file)) {
-                    continue;
-                }
-                if (matchesInArray(testExludeFilePatterns, file)) {
-                    continue;
-                }
-                if (selectedArchNoFormat == "x86") {
-                    if (matchesInArray(testExludeFilePatternsx86, file)) {
-                        continue;
-                    }
-                }
-                if (selectedArchNoFormat.indexOf("x64") !== -1) {
-                    if (matchesInArray(testExludeFilePatternsx64, file)) {
-                        continue;
-                    }
-                }
-                if (process.platform === "darwin") {
-                    if (matchesInArray(testExludeFilePatternsxMacOS, file)) {
-                        continue;
-                    }
-                } else if (process.platform === "linux") {
-                    if (matchesInArray(testExludeFilePatternsxLinux, file)) {
-                        continue;
-                    }
-                } else if (process.platform.startsWith("win")) {
-                    if (matchesInArray(testExludeFilePatternsxWindows, file)) {
-                        continue;
-                    }
-                }
-                
-                params.numberOfTests++;
-                var fullPath = path.join(folder, file);
-                var compiler = selectCompilerExec(selectedArchNoFormat, selectedCompiler, file);
-                var outputName = file.replace(/\.[^/.]+$/, "");
-                var prefix = "./";
-                if (process.platform.startsWith("win")) {
-                    outputName += ".exe";
-                    prefix = "";
-                }
-                var command = `${compiler} ${selectedArch} ${compilerOptsForTests} -I. -I${exoIncludePath} ${fullPath} -o ${outputName}`;
-                try {
-                    var { stdout, stderr } = await jsexec(command);
-                    console.log(stdout); console.log(stderr);
-                    console.log(command);
-                    var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${cesterOpts}`);
-                    console.log(stdout); console.log(stderr);
-                    var { stdout, stderr } = await jsexec(`rm ${outputName}`);
-                    console.log(stdout); console.log(stderr);
-                    params.numberOfTestsRan++;
-                    params.regressionOutput += `\nPASSED ${outputName}`;
-                } catch (error) {
-                    params.numberOfFailedTests++;
-                    params.numberOfTestsRan++;
-                    params.regressionOutput += `\nFAILED ${outputName}`;
-                    console.error(!error.stdout ? (!error.stderr ? "" : error.stderr) : error.stdout);
-                    if ((!error.stdout && !error.stderr) || error.stdout.toString().indexOf("test") === -1) {
-                        console.error(error);
-                    }
-                }
-            }
+            await iterateFolderAndExecute(folder, params, yamlParams);
         }
         reportProgress(params);
+    }
+}
+
+async function iterateFolderAndExecute(folder, params, yamlParams) {
+    var files = fs.readdirSync(folder);
+    if (!files) {
+      core.setFailed("Could not list the content of test folder: " + folder);
+      reportProgress(params);
+      return;
+    }
+    for (j = 0; j < files.length; ++j) {
+        var file = files[j];
+        console.log("File is : " + file);
+        if (fs.lstatSync(file).isDirectory()) {
+            Console.log("In folder " + file);
+            if (yamlParams.testFolderRecursive === true) {
+                iterateFolderAndExecute(file, params, yamlParams);
+            }
+            continue;
+        }
+        if (!matchesInArray(yamlParams.testFilePatterns, file)) {
+            continue;
+        }
+        if (matchesInArray(yamlParams.testExludeFilePatterns, file)) {
+            continue;
+        }
+        if (yamlParams.selectedArchNoFormat == "x86") {
+            if (matchesInArray(yamlParams.testExludeFilePatternsx86, file)) {
+                continue;
+            }
+        }
+        if (yamlParams.selectedArchNoFormat.indexOf("x64") !== -1) {
+            if (matchesInArray(yamlParams.testExludeFilePatternsx64, file)) {
+                continue;
+            }
+        }
+        if (process.platform === "darwin") {
+            if (matchesInArray(yamlParams.testExludeFilePatternsxMacOS, file)) {
+                continue;
+            }
+        } else if (process.platform === "linux") {
+            if (matchesInArray(yamlParams.testExludeFilePatternsxLinux, file)) {
+                continue;
+            }
+        } else if (process.platform.startsWith("win")) {
+            if (matchesInArray(yamlParams.testExludeFilePatternsxWindows, file)) {
+                continue;
+            }
+        }
+        
+        params.numberOfTests++;
+        var fullPath = path.join(folder, file);
+        var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
+        var outputName = file.replace(/\.[^/.]+$/, "");
+        var prefix = "./";
+        if (process.platform.startsWith("win")) {
+            outputName += ".exe";
+            prefix = "";
+        }
+        var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+        try {
+            var { stdout, stderr } = await jsexec(command);
+            console.log(stdout); console.log(stderr);
+            console.log(command);
+            var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
+            console.log(stdout); console.log(stderr);
+            var { stdout, stderr } = await jsexec(`rm ${outputName}`);
+            console.log(stdout); console.log(stderr);
+            params.numberOfTestsRan++;
+            params.regressionOutput += `\nPASSED ${outputName}`;
+        } catch (error) {
+            params.numberOfFailedTests++;
+            params.numberOfTestsRan++;
+            params.regressionOutput += `\nFAILED ${outputName}`;
+            console.error(!error.stdout ? (!error.stderr ? "" : error.stderr) : error.stdout);
+            if ((!error.stdout && !error.stderr) || (error.stdout.toString().indexOf("test") === -1 && 
+                                                     error.stderr.toString().indexOf("test") === -1)) {
+                console.error(error);
+            }
+        }
     }
 }
 
