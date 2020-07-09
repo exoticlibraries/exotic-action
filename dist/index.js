@@ -7332,7 +7332,7 @@ async function afterDownloadDeps() {
                 break;
             }
             try {
-                iterateFolderAndExecute(folder, params, yamlParams);
+                await iterateFolderAndExecute(folder, params, yamlParams);
             } catch (error) {
                 console.error(error);
                 core.setFailed("Failed to iterate the test folder: " + folder);
@@ -7343,7 +7343,7 @@ async function afterDownloadDeps() {
     }
 }
 
-function iterateFolderAndExecute(folder, params, yamlParams) {
+async function iterateFolderAndExecute(folder, params, yamlParams) {
     var files = fs.readdirSync(folder);
     if (!files) {
       core.setFailed("Could not list the content of test folder: " + folder);
@@ -7359,7 +7359,7 @@ function iterateFolderAndExecute(folder, params, yamlParams) {
         if (fs.lstatSync(fullPath).isDirectory()) {
             if (yamlParams.testFolderRecursive === true) {
                 console.log("Scanning into :" + fullPath);
-                iterateFolderAndExecute(fullPath, params, yamlParams);
+                await iterateFolderAndExecute(fullPath, params, yamlParams);
             }
             continue;
         }
@@ -7402,28 +7402,28 @@ function iterateFolderAndExecute(folder, params, yamlParams) {
             prefix = "";
         }
         var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
-        (async function(command, prefix, outputName, yamlParams) {
-            try {
-                var { stdout, stderr } = await jsexec(command);
-                console.log(stdout); console.log(stderr);
-                console.log(command);
-                var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
-                console.log(stdout); console.log(stderr);
-                var { stdout, stderr } = await jsexec(`rm ${outputName}`);
-                console.log(stdout); console.log(stderr);
-                params.numberOfTestsRan++;
-                params.regressionOutput += `\nPASSED ${outputName}`;
-            } catch (error) {
-                params.numberOfFailedTests++;
-                params.numberOfTestsRan++;
-                params.regressionOutput += `\nFAILED ${outputName}`;
-                console.error(!error.stdout ? (!error.stderr ? "" : error.stderr) : error.stdout);
-                if ((!error.stdout && !error.stderr) || (error.stdout.toString().indexOf("test") === -1 && 
-                                                         error.stderr.toString().indexOf("test") === -1)) {
-                    console.error(error);
-                }
+        //(async function(command, prefix, outputName, yamlParams) {
+        try {
+            var { stdout, stderr } = await jsexec(command);
+            console.log(stdout); console.log(stderr);
+            console.log(command);
+            var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
+            console.log(stdout); console.log(stderr);
+            var { stdout, stderr } = await jsexec(`rm ${outputName}`);
+            console.log(stdout); console.log(stderr);
+            params.numberOfTestsRan++;
+            params.regressionOutput += `\nPASSED ${outputName}`;
+        } catch (error) {
+            params.numberOfFailedTests++;
+            params.numberOfTestsRan++;
+            params.regressionOutput += `\nFAILED ${outputName}`;
+            console.error(!error.stdout ? (!error.stderr ? "" : error.stderr) : error.stdout);
+            if ((!error.stdout && !error.stderr) || (error.stdout.toString().indexOf("test") === -1 && 
+                                                     error.stderr.toString().indexOf("test") === -1)) {
+                console.error(error);
             }
-        })(command, prefix, outputName, yamlParams)
+        }
+        //})(command, prefix, outputName, yamlParams)
     }
 }
 
