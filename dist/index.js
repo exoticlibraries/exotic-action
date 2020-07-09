@@ -7318,6 +7318,7 @@ async function afterDownloadDeps() {
         testExludeFilePatternsxWindows: testExludeFilePatternsxWindows,
         selectedCompiler: selectedCompiler,
         exoIncludePath: exoIncludePath,
+        selectedArchNoFormat: selectedArchNoFormat,
         selectedArch: selectedArch
     }
     if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
@@ -7354,7 +7355,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         var fullPath = path.join(folder, file);
         if (fs.lstatSync(fullPath).isDirectory()) {
             if (yamlParams.testFolderRecursive === true) {
-                iterateFolderAndExecute(file, params, yamlParams);
+                await iterateFolderAndExecute(file, params, yamlParams);
             }
             continue;
         }
