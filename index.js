@@ -76,10 +76,15 @@ async function afterDownloadDeps() {
             var folder = testFolders[i];
             if (!fs.existsSync(folder) || !fs.lstatSync(folder).isDirectory()) {
                 core.setFailed("The test folder does not exist: " + folder);
-                reportProgress(params);
-                return;
+                break;
             }
-            await iterateFolderAndExecute(folder, params, yamlParams);
+            try {
+                await iterateFolderAndExecute(folder, params, yamlParams);
+            } catch (error) {
+                console.error(error);
+                core.setFailed("Failed to iterate the test folder: " + folder);
+                break;
+            }
         }
         reportProgress(params);
     }
@@ -94,6 +99,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
     }
     for (j = 0; j < files.length; ++j) {
         var file = files[j];
+        var fullPath = path.join(folder, file);
         console.log("File is : " + file);
         if (fs.lstatSync(file).isDirectory()) {
             Console.log("In folder " + file);
@@ -133,7 +139,6 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         }
         
         params.numberOfTests++;
-        var fullPath = path.join(folder, file);
         var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
