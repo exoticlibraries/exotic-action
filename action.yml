@@ -1,6 +1,11 @@
 
 name: 'Exotic Action'
-description: 'Download exotic libraries into your C/C++ GitHub Action environment. Also, run regression testing with cester.'
+description: 'Download exotic libraries into your C/C++ GitHub Action environment. Also, run regression testing on your repository.'
+author: 'Adewale Azeez <azeezadewale98@gmail.com>'
+
+branding:
+  icon: 'play'
+  color: 'green'
 
 inputs:
     
