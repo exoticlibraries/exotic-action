@@ -81,7 +81,6 @@ inputs:
     required: false
     default: |
         --cester-verbose
-        --cester-nomemtest
         --cester-printversion
     
   install-compilers:

@@ -45,7 +45,7 @@ jobs:
             --verbose
 ```
 
-The example above only install the exotic libraries into the environment and does not run regression test. To run regression set the value of `run-cester-regression` to true, in a situation where the action is used to run regression only set the value of `download-exotic-libraries` to false to disable downloading exotic libraries. For more detail on configuring the regression see the section [Regression Test](#regression-test).
+The example above only install the exotic libraries into the environment and does not run regression test. To run regression set the value of `run-regression` to true, in a situation where the action is used to run regression only set the value of `download-exotic-libraries` to false to disable downloading exotic libraries. For more detail on configuring the regression see the section [Regression Test](#regression-test).
 
 ___
 ## Table of content
@@ -248,7 +248,7 @@ It optional to download the libraries incase the action is to be used to run reg
 
 ## Contributing
 
-If you have any issue or you want to request a feature you can open a request [here](https://github.com/exoticlibraries/libcester/issues/new/choose) anytime and if you made some changes that should be added to the main project send in a [pull request](https://github.com/Thecarisma/Cronux/compare). 
+If you have any issue or you want to request a feature you can open a request [here](https://github.com/exoticlibraries/exotic-action/issues/new/choose) anytime and if you made some changes that should be added to the main project send in a [pull request](https://github.com/exoticlibraries/exotic-action/compare). 
 
 ## References
 
