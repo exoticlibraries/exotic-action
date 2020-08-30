@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Setup Exotic Libraries
-        uses: exoticlibraries/exotic-action@v1
+        uses: exoticlibraries/exotic-action@v1.1
         with:
           download-exotic-libraries: true
           run-regression: false
@@ -146,7 +146,7 @@ To add more option e.g. to report more error, the `compiler-options-for-tests` c
 ```yaml
 #...
       - name: Run Regression
-        uses: exoticlibraries/exotic-action@v1
+        uses: exoticlibraries/exotic-action@v1.1
         with:
           download-exotic-libraries: false
           run-regression: true
@@ -174,7 +174,7 @@ The example below shows how to add the test folders, disable recursive search in
 ```yaml
 #...
       - name: Run Regression
-        uses: exoticlibraries/exotic-action@v1
+        uses: exoticlibraries/exotic-action@v1.1
         with:
           download-exotic-libraries: false
           run-regression: true
@@ -194,7 +194,7 @@ To exclude some folder from compilation and execution it can be added to the `te
 ```yaml
 #...
       - name: Run Regression
-        uses: exoticlibraries/exotic-action@v1
+        uses: exoticlibraries/exotic-action@v1.1
         with:
           download-exotic-libraries: false
           run-regression: true
@@ -223,7 +223,7 @@ The sample configuration below shows how to add runtime option to the executable
 ```yaml
 #...
       - name: Run Regression
-        uses: exoticlibraries/exotic-action@v1
+        uses: exoticlibraries/exotic-action@v1.1
         with:
           download-exotic-libraries: false
           run-regression: true
