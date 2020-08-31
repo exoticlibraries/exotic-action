@@ -2,7 +2,7 @@
 $ExoPath="$HOME/.yo/include/exotic/"
 
 "Downloading libcester ..."
-Invoke-WebRequest https://raw.githubusercontent.com/exoticlibraries/libcester/main/include/exotic/cester.h -OutFile ./cester.h
+Invoke-WebRequest https://raw.githubusercontent.com/exoticlibraries/libcester/dev/include/exotic/cester.h -OutFile ./cester.h
 [System.IO.Directory]::CreateDirectory($ExoPath) > $null
 If ( -not $?) {
     "Failed to create the folder $($ExoPath). Skipping..." 

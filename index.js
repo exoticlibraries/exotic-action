@@ -165,7 +165,7 @@ Runtime Options: ${yamlParams.cesterOpts}
             params.regressionOutput += `\nPASSED ${outputName}`;
             try {
                 var { error, stdout, stderr } = await jsexec(`rm ${outputName}`);
-                console.log(stdout); console.log(stderr); console.log(stderr);
+                console.log(stdout); console.log(stderr); console.log(error);
             } catch (error) { console.log(error) }
         } catch (error) {
             params.numberOfFailedTests++;

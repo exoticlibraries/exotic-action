@@ -7,7 +7,7 @@ fi
 if [ "$2" = "x86" ]; then
     sudo apt-get install gcc-multilib -y
 fi    
-wget -O cester.h https://raw.githubusercontent.com/exoticlibraries/libcester/main/include/exotic/cester.h
+wget -O cester.h https://raw.githubusercontent.com/exoticlibraries/libcester/dev/include/exotic/cester.h
 sudo mkdir -p $HEADER_PATH/exotic/
 sudo mv cester.h $HEADER_PATH/exotic/
 echo Done installing cester
