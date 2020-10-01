@@ -1,5 +1,5 @@
 
-![](https://github.com/exoticlibraries/exotic-action/raw/master/exotic-action.png)
+![](https://github.com/exoticlibraries/exotic-action/raw/main/exotic-action.png)
 
 # Exotic Action
 
@@ -240,9 +240,9 @@ The executable will be executed with the provided flags like below:
 
 ## How it works
 
-The main source file used in the project is [dist/index.js](https://github.com/exoticlibraries/exotic-action/blob/master/dist/index.js) which is a compiled version of [index.js](https://github.com/exoticlibraries/exotic-action/blob/master/dist/index.js) compiled using [zeit/ncc](https://github.com/zeit/ncc). The reason for the compiled version is to prevent commiting the node_modules folder and instead use compiled index.js as described [here](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github).
+The main source file used in the project is [dist/index.js](https://github.com/exoticlibraries/exotic-action/blob/main/dist/index.js) which is a compiled version of [index.js](https://github.com/exoticlibraries/exotic-action/blob/main/dist/index.js) compiled using [zeit/ncc](https://github.com/zeit/ncc). The reason for the compiled version is to prevent commiting the node_modules folder and instead use compiled index.js as described [here](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action#commit-tag-and-push-your-action-to-github).
 
-Exotic Action determined the environment Operating system and platform from the build matrix, `matrix.os`, `matrix.platform` and `matrix.compiler`. The three options determine what compiler and version of the exotic libraries to download. If the *matrix.platform* value is x86 the flag `-m32` will be issued to the compiler and if the value is `x64` the flag `-m64` will be issued. On the windows platform the powershell script [scripts/install.ps1](https://github.com/exoticlibraries/exotic-action/blob/master/scripts/install.ps1) is invoked to install the correct libraries and on other platforms (mac and linux) [scripts/install.sh](https://github.com/exoticlibraries/exotic-action/blob/master/scripts/install.ps1) is invoked to download the libraries. On windows it uses the clang and gcc installed by default in the folder `C:\\msys64\\mingw32|mingw64\\bin\\`, the folder is exported as output parameter for use in other step as `win32-clang-gcc-folder`.
+Exotic Action determined the environment Operating system and platform from the build matrix, `matrix.os`, `matrix.platform` and `matrix.compiler`. The three options determine what compiler and version of the exotic libraries to download. If the *matrix.platform* value is x86 the flag `-m32` will be issued to the compiler and if the value is `x64` the flag `-m64` will be issued. On the windows platform the powershell script [scripts/install.ps1](https://github.com/exoticlibraries/exotic-action/blob/main/scripts/install.ps1) is invoked to install the correct libraries and on other platforms (mac and linux) [scripts/install.sh](https://github.com/exoticlibraries/exotic-action/blob/main/scripts/install.ps1) is invoked to download the libraries. On windows it uses the clang and gcc installed by default in the folder `C:\\msys64\\mingw32|mingw64\\bin\\`, the folder is exported as output parameter for use in other step as `win32-clang-gcc-folder`.
 
 It optional to download the libraries incase the action is to be used to run regression only, setting the option `download-exotic-libraries` to false skip the exotic libraries install phase. If the `run-regression` option is set to true, each file in the test folders matching the file patterns is compiled and executed. See the sections above on setting the compilation and runtime cli options.
 

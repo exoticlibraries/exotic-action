@@ -146,22 +146,33 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             outputName += ".exe";
             prefix = "";
         }
+        console.log(`
+===============================================================================================================
+${outputName}
+Compiler: ${compiler}
+Compiler Options: ${yamlParams.compilerOptsForTests}
+Runtime Options: ${yamlParams.cesterOpts}
+===============================================================================================================
+        `)
         var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
         console.log(command);
         try {
-            var { stdout, stderr } = await jsexec(command);
-            console.log(stdout); console.log(stderr);
-            var { stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
-            console.log(stdout); console.log(stderr);
-            var { stdout, stderr } = await jsexec(`rm ${outputName}`);
-            console.log(stdout); console.log(stderr);
+            var { error, stdout, stderr } = await jsexec(command);
+            console.log(stdout); console.log(stderr); if (error) { throw error; }
+            var { error, stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
+            console.log(stdout); console.log(stderr); if (error) { throw error; }
             params.numberOfTestsRan++;
             params.regressionOutput += `\nPASSED ${outputName}`;
+            try {
+                var { error, stdout, stderr } = await jsexec(`rm ${outputName}`);
+                console.log(stdout); console.log(stderr); console.log(error);
+            } catch (error) { console.log(error) }
         } catch (error) {
             params.numberOfFailedTests++;
             params.numberOfTestsRan++;
             params.regressionOutput += `\nFAILED ${outputName}`;
-            console.error(!error.stdout ? (!error.stderr ? "" : error.stderr) : error.stdout);
+            console.error("Process Error Code " + (error.code ? error.code : "Unknown"))
+            console.error(!error.stdout ? (!error.stderr ? error : error.stderr) : error.stdout);
             if ((!error.stdout && !error.stderr) || (error.stdout.toString().indexOf("test") === -1 && 
                                                      error.stderr.toString().indexOf("test") === -1)) {
                 console.error(error);
