@@ -73,8 +73,7 @@ inputs:
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'
     required: false
-    default: |
-        -pedantic
+    default:
     
   regression-cli-options: 
     description: 'The options to send to the compiled test executables'
