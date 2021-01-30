@@ -250,6 +250,13 @@ It optional to download the libraries incase the action is to be used to run reg
 
 If you have any issue or you want to request a feature you can open a request [here](https://github.com/exoticlibraries/exotic-action/issues/new/choose) anytime and if you made some changes that should be added to the main project send in a [pull request](https://github.com/exoticlibraries/exotic-action/compare). 
 
+To install ncc and build the distributable dit/index.js file. Never commit the node_modules folder.
+
+```
+npm i -g @vercel/ncc
+ncc build index.js
+```
+
 ## References
 
  - [About Actions](https://docs.github.com/en/actions/creating-actions/about-actions)
