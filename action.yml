@@ -77,11 +77,17 @@ inputs:
         -pedantic
     
   regression-cli-options: 
-    description: 'If false skip running the test files under test folders'
+    description: 'The options to send to the compiled test executables'
     required: false
     default: |
         --cester-verbose
         --cester-printversion
+    
+  selected-exotic-libraries: 
+    description: 'The selected list of exotic libraries to install, if skipped only libcester is installed'
+    required: false
+    default: |
+        libcester
     
   install-compilers:
     description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'
