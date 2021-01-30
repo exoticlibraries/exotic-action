@@ -295,7 +295,7 @@ function formatArch(selectedArch) {
 }
 
 function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
-    var command = "";
+    var command = "", command2 = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...");
@@ -303,20 +303,31 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         fs.mkdirSync(exoIncludePath, { recursive: true });
     }
     if (process.platform === "linux" || process.platform === "darwin") {
-        command = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh; bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
+        command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
+        command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
         
     } else if (process.platform === "win32") {
-        command = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
+        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
         callback(false);
         return;
     }
-    console.log(command);
-    exec.exec(command).then((result) => {
+    console.log(command1);
+    console.log(command2);
+    exec.exec(command1).then((result) => {
         if (result === 0) {
-            callback(true);
+            exec.exec(command2).then((result) => {
+                if (result === 0) {
+                    callback(true);
+                } else {
+                    callback(false);
+                }
+            }).catch((error) => {
+                console.error(error);
+                callback(false);
+            });
         } else {
             callback(false);
         }
