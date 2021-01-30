@@ -33,6 +33,9 @@ jobs:
         with:
           download-exotic-libraries: true
           run-regression: false
+          selected-exotic-libraries: |
+            libcester@main
+            libxtd@dev
           test-folders: |
             test/
           test-file-pattern: |
@@ -80,6 +83,7 @@ The `with` portion of the workflow can be configured before the action will work
 | `test-exclude-file-pattern-windows` | List of multiline regex strings to match files to skip on windows os when searching for test files in the test folders. | Multiline Regex | No |
 | `compiler-options-for-tests` | The multiline string of flags to pass to the compiler when compiling the test files. | Multiline String | No |
 | `regression-cli-options` | The multiline string of flags to pass to the compiled executable when running it. | Multiline String | No |
+| `selected-exotic-libraries` | The selected list of exotic libraries to install, if skipped only libcester is installed. | Multiline String | No |
 
 ### Output variables
 
