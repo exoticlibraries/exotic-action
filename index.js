@@ -300,7 +300,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     
     console.log("Downloading Exotic Libraries...");
     if (!fs.existsSync(exoIncludePath)){
-        fs.mkdirSync(exoIncludePath);
+        fs.mkdirSync(exoIncludePath, { recursive: true });
     }
     if (process.platform === "linux" || process.platform === "darwin") {
         command = `bash <(curl -s https://exoticlibraries.github.io/magic/install.sh) –installfolder=${exoIncludePath} ${selectedLibs}`;
