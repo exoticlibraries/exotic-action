@@ -310,7 +310,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         fs.mkdirSync(exoIncludePath, { recursive: true });
     }
     if (process.platform === "linux" || process.platform === "darwin") {
-        command = `source <(curl -s https://exoticlibraries.github.io/magic/install.sh) --installfolder=${exoIncludePath} ${selectedLibs}`;
+        command = `curl -s https://exoticlibraries.github.io/magic/install.sh | bash /dev/stdin --installfolder=${exoIncludePath} ${selectedLibs}`;
         
     } else if (process.platform === "win32") {
         command = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
