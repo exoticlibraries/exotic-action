@@ -310,7 +310,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         command = "bash <(curl -s https://exoticlibraries.github.io/magic/install.sh) " + selectedLibs;
         
     } else if (process.platform === "win32") {
-        command = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" ${selectedLibs}`;
+        command = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
