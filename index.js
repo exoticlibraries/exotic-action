@@ -298,9 +298,12 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     var command = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
-    console.log("Downloading Exotic Libraries...")
+    console.log("Downloading Exotic Libraries...");
+    if (!fs.existsSync(exoIncludePath)){
+        fs.mkdirSync(exoIncludePath);
+    }
     if (process.platform === "linux" || process.platform === "darwin") {
-        command = "bash <(curl -s https://exoticlibraries.github.io/magic/install.sh) " + selectedLibs;
+        command = `bash <(curl -s https://exoticlibraries.github.io/magic/install.sh) –installfolder=${exoIncludePath} ${selectedLibs}`;
         
     } else if (process.platform === "win32") {
         command = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
