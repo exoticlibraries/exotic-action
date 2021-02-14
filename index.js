@@ -47,6 +47,16 @@ async function afterDownloadDeps(exoIncludePath) {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
+    const supportedCompilers = [
+        'gcc',
+        'clang'
+    ];
+    
+    
+    if (!supportedCompilers.includes(selectedCompiler)) {
+        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+        return;
+    }
     var params = {
         numberOfTestsRan: 0,
         numberOfFailedTests: 0,
@@ -141,9 +151,6 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         
         params.numberOfTests++;
         var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
-        if (!compiler) {
-            return;
-        }
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
         if (process.platform.startsWith("win")) {
@@ -282,7 +289,6 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
         }
     }
-    console.error("Exotic Action does not support the compiler '" + selectedCompiler + "'");
 }
 
 function formatArch(selectedArch) {
