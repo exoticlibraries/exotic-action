@@ -53,7 +53,7 @@ async function afterDownloadDeps(exoIncludePath) {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
-    if (!validateAndInstallAlternateCompiler(selectedCompiler, selectedArch)) {
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArch))) {
         return;
     }
     var params = {
@@ -290,7 +290,7 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
     }
 }
 
-function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
+async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
     if (!supportedCompilers.includes(selectedCompiler)) {
         core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
         return false;
@@ -304,6 +304,7 @@ function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
             return false;
         }
     }
+    return false;
 }
 
 function formatArch(selectedArch) {

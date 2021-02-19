@@ -14,6 +14,12 @@ const jsexec = util.promisify(__nccwpck_require__(3129).exec);
 const fs = __nccwpck_require__(5747);
 const path = __nccwpck_require__(5622);
 const homedir = __nccwpck_require__(2087).homedir();
+    
+const supportedCompilers = [
+    'gcc',
+    'clang',
+    'tcc'
+];
 
 main();
 function main() {
@@ -54,14 +60,7 @@ async function afterDownloadDeps(exoIncludePath) {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
-    const supportedCompilers = [
-        'gcc',
-        'clang'
-    ];
-    
-    
-    if (!supportedCompilers.includes(selectedCompiler)) {
-        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArch))) {
         return;
     }
     var params = {
@@ -296,6 +295,23 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
         }
     }
+}
+
+async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
+    if (!supportedCompilers.includes(selectedCompiler)) {
+        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+        return false;
+    }
+    if (selectedCompiler === "tcc") {
+        if (process.platform === "linux") {
+            var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
+            return true;
+        } else {
+            console.log("The compiler '" + selectedCompiler + "' not supported on this platform '" + process.platform + "'");
+            return false;
+        }
+    }
+    return false;
 }
 
 function formatArch(selectedArch) {
