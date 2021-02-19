@@ -7,6 +7,12 @@ const jsexec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const path = require('path');
 const homedir = require('os').homedir();
+    
+const supportedCompilers = [
+    'gcc',
+    'clang',
+    'tcc'
+];
 
 main();
 function main() {
@@ -47,14 +53,7 @@ async function afterDownloadDeps(exoIncludePath) {
     const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
-    const supportedCompilers = [
-        'gcc',
-        'clang'
-    ];
-    
-    
-    if (!supportedCompilers.includes(selectedCompiler)) {
-        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+    if (!validateAndInstallAlternateCompiler(selectedCompiler, selectedArch)) {
         return;
     }
     var params = {
@@ -287,6 +286,22 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
         } else if (selectedCompiler.startsWith("clang")) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+        }
+    }
+}
+
+function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
+    if (!supportedCompilers.includes(selectedCompiler)) {
+        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+        return false;
+    }
+    if (selectedCompiler === "tcc") {
+        if (process.platform === "linux") {
+            var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
+            return true;
+        } else {
+            console.log("The compiler '" + selectedCompiler + "' not supported on this platform '" + process.platform + "'");
+            return false;
         }
     }
 }
