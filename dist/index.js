@@ -362,16 +362,18 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     console.log(command2);
     exec.exec(command1).then((result) => {
         if (result === 0) {
-            exec.exec(command2).then((result) => {
-                if (result === 0) {
-                    callback(true);
-                } else {
+            if (command2 !== "") {
+                exec.exec(command2).then((result) => {
+                    if (result === 0) {
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                }).catch((error) => {
+                    console.error(error);
                     callback(false);
-                }
-            }).catch((error) => {
-                console.error(error);
-                callback(false);
-            });
+                });
+            }
         } else {
             callback(false);
         }
