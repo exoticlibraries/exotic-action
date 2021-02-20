@@ -157,6 +157,9 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         
         params.numberOfTests++;
         var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
+        if (!compiler) {
+            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compiler the test ${file}`);
+        }
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
         if (process.platform.startsWith("win")) {
@@ -294,6 +297,9 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         } else if (selectedCompiler.startsWith("clang")) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
         }
+    }
+    if (supportedCompilers.includes(selectedCompiler)) {
+        return selectedCompiler;
     }
 }
 
