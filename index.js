@@ -146,6 +146,8 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             if (matchesInArray(yamlParams.testExludeFilePatternsxWindows, file)) {
                 continue;
             }
+        } else if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
+            continue;
         }
         
         params.numberOfTests++;
