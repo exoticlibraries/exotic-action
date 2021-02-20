@@ -161,6 +161,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
         if (!compiler) {
             console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compiler the test ${file}`);
+            continue;
         }
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
