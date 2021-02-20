@@ -294,12 +294,14 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
     } else {
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
+
         } else if (selectedCompiler.startsWith("clang")) {
             return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+
+        } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
+            return selectedCompiler;
+
         }
-    }
-    if (supportedCompilers.includes(selectedCompiler)) {
-        return selectedCompiler;
     }
 }
 
