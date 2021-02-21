@@ -13,9 +13,9 @@ You can view an example of this below.
 name: CI with C/C++ Exotic Action
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         platform: [x86, x64]
-        compiler: [gnu, clang]
+        compiler: [gnu, clang, tcc, cl]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -84,6 +84,8 @@ The `with` portion of the workflow can be configured before the action will work
 | `compiler-options-for-tests` | The multiline string of flags to pass to the compiler when compiling the test files. | Multiline String | No |
 | `regression-cli-options` | The multiline string of flags to pass to the compiled executable when running it. | Multiline String | No |
 | `selected-exotic-libraries` | The selected list of exotic libraries to install, if skipped only libcester is installed. | Multiline String | No |
+| `test-exclude-file-pattern-{compiler}` | List of multiline regex strings to match files to skip when searching for test files if the `${compiler}` matches the compiler in the strategy.matrx.compiler. E.g. to exclude some test if the compiler is gcc set `test-exclude-file-pattern-gcc`, to exclude some test when using tcc compiler `test-exclude-file-pattern-tcc` | Multiline Regex | No |
+| `compiler-options-for-tests-{compiler}` | The multiline string of flags to pass to a compiler when compiling the test files. E.g. to pass the flag during compilation if the selected compiler is tcc  `compiler-options-for-tests-tcc` to pass flag to only clang compiler `compiler-options-for-tests-clang` | Multiline String | No |
 
 ### Output variables
 
@@ -102,7 +104,8 @@ The following compiler is supported in the action.
 
 - gcc
 - clang
-- ~cl (Not Yet)~
+- tcc
+- msvc
 
 If any or combination of the compiler above is specified the compiler will be used to compile each test file in the tests folder. 
 
