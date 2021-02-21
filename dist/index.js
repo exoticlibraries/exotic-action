@@ -155,9 +155,14 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             if (matchesInArray(yamlParams.testExludeFilePatternsxWindows, file)) {
                 continue;
             }
-        } else if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
+        } else if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-tcc`, 'array', [ ]), file)) {
             continue;
         }
+        console.log(">>>>");
+        console.log(getAndSanitizeInputs(`test-exclude-file-pattern-tcc`, 'array', [ ]));
+        console.log(matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-tcc`, 'array', [ ]), file));
+        console.log(file);
+        console.log("<<<<");
         
         let result = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
         if (!result) {
@@ -254,7 +259,7 @@ function matchesInArray(patternArray, text) {
     var k;
     for (k = 0; k < patternArray.length; k++) {
         var pattern = patternArray[k];
-        console.log(" <==>" + text + " in " + pattern + " is " + (new RegExp(pattern).test(text)));
+        //console.log(" <==>" + text + " in " + pattern + " is " + (new RegExp(pattern).test(text)));
         if (new RegExp(pattern).test(text)) {
             return true;
         }
