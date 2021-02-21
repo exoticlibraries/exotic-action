@@ -153,14 +153,15 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         }
         
         params.numberOfTests++;
-        let {
-            compiler, 
-            specificCompilerOptions
-        } = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
-        if (!compiler) {
+        let result = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
+        if (!result) {
             console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the test ${file}`);
             continue;
         }
+        let {
+            compiler, 
+            specificCompilerOptions
+        } = result;
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
         if (process.platform.startsWith("win")) {
