@@ -374,7 +374,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
                 console.log(stdout); console.log(stderr); console.log(error);
 
             } else {
-                console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
+                console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
                 return false;
             }
             var { error, stdout, stderr } = await jsexec(`powershell -Command "Expand-Archive '${exoPath}/tcc-win.zip' -DestinationPath '${exoPath}/tcc-win' -Force"`);
@@ -382,14 +382,23 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
             return true;
 
         } else {
-            console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
+            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
             return false;
         }
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
-        
+        var files = fs.readdirSync('C:/Program Files (x86)/Microsoft Visual Studio/');
+        if (!files) {
+            core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'. Failed to read Microsoft Visual Studio folder`);
+            return false;
+        }
+        var index;
+        for (index = 0; index < files.length; ++index) {
+            var file = files[index];
+            console.log(">>>>>>>>>>>>>> " + file);
+        }
         return true;
     }
-    console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
+    console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
     return false;
 }
 
