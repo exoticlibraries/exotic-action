@@ -346,10 +346,10 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
             if (!fs.existsSync(exoPath)){
                 fs.mkdirSync(exoPath, { recursive: true });
             }
-            if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) {
+            if (arch.startsWith("x") && arch.endsWith("64")) {
                 var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
             
-            } else if (selectedArch === "x86" || selectedArch == "i386") {
+            } else if (arch === "x86" || arch == "i386") {
                 var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win32-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
                 
             } else {
