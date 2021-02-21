@@ -18,7 +18,8 @@ const homedir = __nccwpck_require__(2087).homedir();
 const supportedCompilers = [
     'gcc',
     'clang',
-    'tcc'
+    'tcc',
+    'msvc'
 ];
 const exoPath = homedir + "/exotic-libraries/";
 const exoIncludePath = homedir + "/exotic-libraries/include/";
@@ -315,7 +316,13 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
             return {
                 compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
-                specificCompilerOptions: `-D__BASE_FILE__=\\\"${file}\\\"`
+                specificCompilerOptions: ""//`-D__BASE_FILE__=\\\"${file}\\\"`
+            };
+
+        } else if (selectedCompiler.startsWith("msvc")) {
+            return {
+                compiler: `cl`,
+                specificCompilerOptions: ""
             };
 
         }
@@ -378,7 +385,11 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
             console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
             return false;
         }
+    } else if (selectedCompiler === "msvc" && process.platform === "win32") {
+        
+        return true;
     }
+    console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
     return false;
 }
 

@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         platform: [x86, x64]
-        compiler: [gnu, clang, tcc, cl]
+        compiler: [gnu, clang, tcc, msvc]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
