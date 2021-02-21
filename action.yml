@@ -69,21 +69,6 @@ inputs:
     description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on Windows'
     required: false
     default: 
-  
-  test-exclude-file-pattern-gcc:
-    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if the compiler is gcc'
-    required: false
-    default:
-
-  test-exclude-file-pattern-clang:
-    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if the compiler is clang'
-    required: false
-    default:
-
-  test-exclude-file-pattern-tcc:
-    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if the compiler is tcc'
-    required: false
-    default:
     
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'

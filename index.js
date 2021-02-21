@@ -149,6 +149,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
                 continue;
             }
         } else if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-tcc`, 'array', [ ]), file)) {
+            console.log("Yah yeah >>>>>>>>>>>>>>>>");
             continue;
         }
         console.log(">>>>");
