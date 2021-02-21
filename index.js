@@ -51,10 +51,11 @@ async function afterDownloadDeps(exoIncludePath) {
     const testExludeFilePatternsxLinux = getAndSanitizeInputs('test-exclude-file-pattern-linux', 'array', [ ]);
     const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
-    const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
+    const unformatedSelectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
+    const selectedArch = formatArch(unformatedSelectedArch);
     
-    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArch))) {
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, unformatedSelectedArch))) {
         return;
     }
     var params = {
