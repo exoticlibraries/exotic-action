@@ -152,7 +152,6 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             continue;
         }
         
-        params.numberOfTests++;
         let result = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
         if (!result) {
             console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the test ${file}`);
@@ -168,6 +167,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             outputName += ".exe";
             prefix = "";
         }
+        params.numberOfTests++;
         console.log(`
 ===============================================================================================================
 ${outputName}
@@ -387,7 +387,7 @@ function formatArch(selectedArch) {
 }
 
 function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
-    var command = "", command2 = "";
+    var command1 = "", command2 = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...");
