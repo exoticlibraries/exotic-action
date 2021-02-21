@@ -101,8 +101,8 @@ async function afterDownloadDeps(exoIncludePath) {
             try {
                 await iterateFolderAndExecute(folder, params, yamlParams);
             } catch (error) {
-                console.error(error);
-                core.setFailed("Failed to iterate the test folder: " + folder);
+                console.error("Failed to iterate the test folder: " + folder);
+                core.setFailed(error);
                 break;
             }
         }
@@ -348,6 +348,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
     if (selectedCompiler === "tcc") {
         if (process.platform === "linux" && (arch === "x64" || arch === "x86_64")) {
             var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
+            console.log(stdout); console.log(stderr); console.log(error);
             return true;
 
         } else if (process.platform === "win32") {
@@ -356,15 +357,18 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
             }
             if (arch.startsWith("x") && arch.endsWith("64")) {
                 var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
-            
+                console.log(stdout); console.log(stderr); console.log(error);
+
             } else if (arch === "x86" || arch == "i386") {
                 var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win32-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
-                
+                console.log(stdout); console.log(stderr); console.log(error);
+
             } else {
                 console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
                 return false;
             }
             var { error, stdout, stderr } = await jsexec(`powershell -Command "Expand-Archive '${exoPath}/tcc-win.zip' -DestinationPath '${exoPath}/tcc-win' -Force"`);
+            console.log(stdout); console.log(stderr); console.log(error);
             return true;
 
         } else {
