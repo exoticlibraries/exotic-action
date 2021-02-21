@@ -161,7 +161,7 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         
         let result = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
         if (!result) {
-            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the test ${file}`);
+            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the file ${file}`);
             continue;
         }
         let {

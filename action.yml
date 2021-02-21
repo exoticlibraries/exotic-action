@@ -69,6 +69,21 @@ inputs:
     description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder on Windows'
     required: false
     default: 
+  
+  test-exclude-file-pattern-gcc:
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if the compiler is gcc'
+    required: false
+    default:
+
+  test-exclude-file-pattern-clang:
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if the compiler is clang'
+    required: false
+    default:
+
+  test-exclude-file-pattern-tcc:
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if the compiler is tcc'
+    required: false
+    default:
     
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'
@@ -92,12 +107,6 @@ inputs:
     description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'
     required: false
     default:
-  
-  test-exclude-file-pattern-gcc:
-
-  test-exclude-file-pattern-clang:
-
-  test-exclude-file-pattern-tcc:
     
   the-matrix-compiler-internal-use-only: 
     description: 'The compiler to use to run the regression tests. Note: do not change the value in workflow yml.'
