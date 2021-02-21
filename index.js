@@ -13,12 +13,13 @@ const supportedCompilers = [
     'clang',
     'tcc'
 ];
+const exoPath = homedir + "/exotic-libraries/";
+const exoIncludePath = homedir + "/exotic-libraries/include/";
 
 main();
 function main() {
     const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
     const selectedExoticLibraries = getAndSanitizeInputs('selected-exotic-libraries', 'flatten_string', 'libcester');
-    const exoIncludePath = homedir + "/exotic-libraries/include/";
     if (downloadExLibs === true) {
         downloadExoticLibraries(selectedExoticLibraries, exoIncludePath, async function(completed) {
             if (completed === true) {
@@ -151,9 +152,12 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         }
         
         params.numberOfTests++;
-        var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
+        let {
+            compiler, 
+            specificCompilerOptions
+        } = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
         if (!compiler) {
-            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compiler the test ${file}`);
+            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the test ${file}`);
             continue;
         }
         var outputName = file.replace(/\.[^/.]+$/, "");
@@ -170,7 +174,7 @@ Compiler Options: ${yamlParams.compilerOptsForTests}
 Runtime Options: ${yamlParams.cesterOpts}
 ===============================================================================================================
         `)
-        var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+        var command = `${compiler} ${specificCompilerOptions} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
         console.log(command);
         try {
             var { error, stdout, stderr } = await jsexec(command);
@@ -278,24 +282,51 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         }
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
             if (selectedArchNoFormat === "x86") {
-                return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe");
+                return {
+                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                    specificCompilerOptions: ""
+                };
+
             } else {
-                return ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
+                return {
+                    compiler: ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
+                    specificCompilerOptions: ""
+                };
+
             }
             
         } else if (selectedCompiler.startsWith("clang")) {
-            return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe");
+            return {
+                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                specificCompilerOptions: ""
+            };
             
+        } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
+            return {
+                compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
+                specificCompilerOptions: `-D__BASE_FILE__=\\\"${file}\\\"`
+            };
+
         }
+
     } else {
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
-            return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
+            return {
+                compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc"),
+                specificCompilerOptions: ""
+            };
 
         } else if (selectedCompiler.startsWith("clang")) {
-            return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+            return {
+                compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang"),
+                specificCompilerOptions: ""
+            };
 
         } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
-            return selectedCompiler;
+            return {
+                compiler: selectedCompiler,
+                specificCompilerOptions: ""
+            };
 
         }
     }
@@ -307,11 +338,29 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
         return false;
     }
     if (selectedCompiler === "tcc") {
-        if (process.platform === "linux") {
+        if (process.platform === "linux" && (arch === "x64" || arch === "x86_64")) {
             var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
             return true;
+
+        } else if (process.platform === "win32") {
+            if (!fs.existsSync(exoPath)){
+                fs.mkdirSync(exoPath, { recursive: true });
+            }
+            if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) {
+                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
+            
+            } else if (selectedArch === "x86" || selectedArch == "i386") {
+                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win32-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
+                
+            } else {
+                console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
+                return false;
+            }
+            var { error, stdout, stderr } = await jsexec(`powershell -Command "Expand-Archive '${exoPath}/tcc-win.zip' -DestinationPath '${exoPath}/tcc-win' -Force"`);
+            return true;
+
         } else {
-            console.log("The compiler '" + selectedCompiler + "' not supported on this platform '" + process.platform + "'");
+            console.log(`The compiler '${selectedCompiler} not supported on this platform '${process.platform}:${arch}'`);
             return false;
         }
     }
@@ -319,9 +368,9 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
 }
 
 function formatArch(selectedArch) {
-    if (selectedArch == "x64" || selectedArch.endsWith("x64")) {
+    if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) { //x64 and x86_64 - 64 bits
         return "-m64";
-    } else if (selectedArch == "x86") {
+    } else if (selectedArch === "x86" || selectedArch == "i386") { //x86 - 32 bits
         if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
             return "-m64";
         }
