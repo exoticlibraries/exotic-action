@@ -247,7 +247,7 @@ function matchesInArray(patternArray, text) {
     var k;
     for (k = 0; k < patternArray.length; k++) {
         var pattern = patternArray[k];
-        //console.log(" <==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
+        console.log(" <==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
         if (new RegExp(pattern).test(text)) {
             return true;
         }
