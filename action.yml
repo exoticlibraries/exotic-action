@@ -91,7 +91,13 @@ inputs:
   install-compilers:
     description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'
     required: false
-    default:      
+    default:
+  
+  test-exclude-file-pattern-gcc:
+
+  test-exclude-file-pattern-clang:
+
+  test-exclude-file-pattern-tcc:
     
   the-matrix-compiler-internal-use-only: 
     description: 'The compiler to use to run the regression tests. Note: do not change the value in workflow yml.'
