@@ -294,7 +294,7 @@ function walkForFilesOnly(dir, extensions, callback) {
     for (let file of files) {
         file = path.resolve(dir, file);
         if (fs.lstatSync(file).isDirectory()) {
-            walkForFilesOnly(file, callback);
+            walkForFilesOnly(file, extensions, callback);
         } else {
             if (extensions) {
                 let found = false;
@@ -418,7 +418,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
         let foundCompiler = false;
         let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
-        walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise`, [".exe"], function (err, file) {
+        walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise`, [".bat"], function (err, file) {
             if (err) {
                 return;
             }
