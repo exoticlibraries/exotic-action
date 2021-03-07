@@ -330,14 +330,14 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
         if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
             if (yamlParams.selectedArchNoFormat === "x86") {
                 return {
-                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                     compilationOption: generalOption,
                     preCompileCommand: ''
                 };
 
             } else {
                 return {
-                    compiler: ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
+                    compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
                     compilationOption: generalOption,
                     preCompileCommand: ''
                 };
@@ -346,12 +346,12 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             
         } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
-                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                 compilationOption: generalOption,
                 preCompileCommand: ''
             };
             
-        } else if (yamlParams.selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
             return {
                 compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
                 compilationOption: generalOption,
@@ -370,19 +370,19 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
     } else {
         if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
             return {
-                compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc"),
+                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "g++" : "gcc"),
                 compilationOption: generalOption,
                 preCompileCommand: ''
             };
 
         } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
-                compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang"),
+                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "clang++" : "clang"),
                 compilationOption: generalOption,
                 preCompileCommand: ''
             };
 
-        } else if (yamlParams.selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
             return {
                 compiler: yamlParams.selectedCompiler,
                 compilationOption: generalOption,
@@ -428,28 +428,33 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
             console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
             return false;
         }
-    } else if (selectedCompiler === "msvc" && process.platform === "win32") {
-        let foundCompiler = false;
-        let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
-        walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise/Common7/Tools/`, [".bat"], function (err, file) {
-            if (err) {
-                return false;
-            }
-            if (file.endsWith("VsDevCmd.bat")) {
-                globalParams.msvcVsDevCmd = file;
-                foundCompiler = true;
+    } else if (selectedCompiler === "msvc") {
+        if (process.platform === "win32") {
+            let foundCompiler = false;
+            let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
+            walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise/Common7/Tools/`, [".bat"], function (err, file) {
+                if (err) {
+                    return false;
+                }
+                if (file.endsWith("VsDevCmd.bat")) {
+                    globalParams.msvcVsDevCmd = file;
+                    foundCompiler = true;
+                    return false;
+                }
+                return true;
+            });
+            if (!foundCompiler) {
+                core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
                 return false;
             }
             return true;
-        });
-        if (!foundCompiler) {
-            core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
+            
+        } else {
+            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
             return false;
         }
-        return true;
     }
-    console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
-    return false;
+    return true;
 }
 
 function formatArch(selectedCompiler, selectedArch) {
