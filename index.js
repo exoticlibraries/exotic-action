@@ -362,7 +362,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             return {
                 compiler: `cl`,
                 compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
-                preCompileCommand: `call "${globalParams.msvcVsDevCmd}" && `
+                preCompileCommand: `call "${globalParams.msvcVsDevCmd} --arch=${yamlParams.selectedArchNoFormat}" && `
             };
 
         }
