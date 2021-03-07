@@ -46,6 +46,7 @@ function main() {
 
 // TODO: treats install-compilers
 async function afterDownloadDeps(exoIncludePath) {
+    const actionOs = getAndSanitizeInputs('matrix.os', 'string', '');
     const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
     const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
@@ -59,11 +60,10 @@ async function afterDownloadDeps(exoIncludePath) {
     const testExludeFilePatternsxLinux = getAndSanitizeInputs('test-exclude-file-pattern-linux', 'array', [ ]);
     const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
-    const unformatedSelectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    const selectedArch = formatArch(unformatedSelectedArch);
+    const selectedArch = formatArch(selectedArchNoFormat);
     
-    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, unformatedSelectedArch))) {
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs))) {
         return;
     }
     var params = {
@@ -417,7 +417,8 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
         }
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
         let foundCompiler = false;
-        walkForFilesOnly('C:/Program Files (x86)/Microsoft Visual Studio/*/Enterprise', [".exe"], function (err, file) {
+        let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
+        walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise`, [".exe"], function (err, file) {
             if (err) {
                 return;
             }
