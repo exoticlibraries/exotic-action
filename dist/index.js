@@ -287,7 +287,6 @@ function strToArray(str, seperator) {
 }
 
 var walkForFilesOnly = function(dir, callback) {
-    var results = [];
     fs.readdir(dir, function(err, list) {
       if (err) return callback(err);
       var pending = list.length;
@@ -296,7 +295,7 @@ var walkForFilesOnly = function(dir, callback) {
         file = path.resolve(dir, file);
         fs.stat(file, function(err, stat) {
           if (stat && stat.isDirectory()) {
-            walk(file, callback);
+            walkForFilesOnly(file, callback);
           } else {
             callback(null, file);
             //if (!--pending) callback(null, file);
