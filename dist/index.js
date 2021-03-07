@@ -309,7 +309,9 @@ function walkForFilesOnly(dir, extensions, callback) {
                 }
             }
             if (callback) {
-                callback(null, file);
+                if (!callback(null, file)) {
+                    break;
+                }
             }
         }
     }
@@ -418,14 +420,18 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
         let foundCompiler = false;
         let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
-        walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise`, [".bat"], function (err, file) {
+        walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise/Common7/Tools/`, [".bat"], function (err, file) {
             if (err) {
-                return;
+                return false;
             }
-            console.log(">>>>>>>>>>>>>> " + file);
+            if (file.endsWith("VsDevCmd.bat")) {
+                console.log(">>>>>>>>>>>>>> " + file);
+                return false;
+            }
+            return true;
         });
         if (!foundCompiler) {
-            core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'. Failed to read Microsoft Visual Studio folder`);
+            core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
             return false;
         }
     }
