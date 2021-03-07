@@ -286,7 +286,7 @@ function strToArray(str, seperator) {
     return str.split(seperator);
 }
 
-function walkForFilesOnly(dir, callback) {
+function walkForFilesOnly(dir, extensions, callback) {
     var files = fs.readdirSync(dir);
     if (!files) {
         return callback(`Unable to read the folder '${dir}'`);
@@ -296,6 +296,18 @@ function walkForFilesOnly(dir, callback) {
         if (fs.lstatSync(file).isDirectory()) {
             walkForFilesOnly(file, callback);
         } else {
+            if (extensions) {
+                let found = false;
+                for (let extension of extensions) {
+                    if (file.endsWith(extension)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    continue;
+                }
+            }
             if (callback) {
                 callback(null, file);
             }
@@ -405,7 +417,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
         }
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
         let foundCompiler = false;
-        walkForFilesOnly('C:/Program Files (x86)/Microsoft Visual Studio/', function (err, file) {
+        walkForFilesOnly('C:/Program Files (x86)/Microsoft Visual Studio/', ["cl.exe"], function (err, file) {
             if (err) {
                 return;
             }
