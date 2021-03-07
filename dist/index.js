@@ -161,9 +161,9 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             }
         }
         
-        if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
+        /*if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
             continue;
-        }
+        }*/
         
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
