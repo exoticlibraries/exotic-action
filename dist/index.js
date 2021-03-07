@@ -64,7 +64,7 @@ async function afterDownloadDeps(exoIncludePath) {
     const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    const selectedArch = formatArch(selectedArchNoFormat);
+    const selectedArch = formatArch(selectedCompiler, selectedArchNoFormat);
     
     if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs))) {
         return;
@@ -459,12 +459,18 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
     return false;
 }
 
-function formatArch(selectedArch) {
+function formatArch(selectedCompiler, selectedArch) {
     if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) { //x64 and x86_64 - 64 bits
+        if (selectedCompiler === "msvc") {
+            return "";
+        }
         return "-m64";
     } else if (selectedArch === "x86" || selectedArch == "i386") { //x86 - 32 bits
         if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
             return "-m64";
+        }
+        if (selectedCompiler === "msvc") {
+            return "";
         }
         return "-m32";
     } else {
