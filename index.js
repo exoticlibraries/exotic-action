@@ -85,7 +85,7 @@ async function afterDownloadDeps(exoIncludePath) {
         selectedArchNoFormat: selectedArchNoFormat,
         selectedArch: selectedArch
     }
-    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
+    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== undefined && (testFolders instanceof Array)) {
         var i;
         var j;
         var k;
@@ -154,9 +154,9 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             }
         }
         
-        /*if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
+        if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
             continue;
-        }*/
+        }
         
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
@@ -322,9 +322,6 @@ function walkForFilesOnly(dir, extensions, callback) {
 
 function selectCompilerExec(yamlParams, fullPath, outputName) {
     let generalOption = `-I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
-    console.log("Doing " + globalParams.msvcVsDevCm);
-    console.log(yamlParams);
-    console.log(yamlParams.selectedCompiler);
     if (process.platform.startsWith("win")) {
         var arch = "64";
         if (yamlParams.selectedArchNoFormat === "x86") {
