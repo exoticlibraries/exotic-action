@@ -330,7 +330,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
         if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
             if (yamlParams.selectedArchNoFormat === "x86") {
                 return {
-                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                     compilationOption: generalOption,
                     preCompileCommand: ''
                 };
