@@ -329,6 +329,9 @@ function walkForFilesOnly(dir, extensions, callback) {
 
 function selectCompilerExec(yamlParams, fullPath, outputName) {
     let generalOption = `-I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+    console.log("Doing " + globalParams.msvcVsDevCm);
+    console.log(yamlParams);
+    console.log(yamlParams.selectedCompiler);
     if (process.platform.startsWith("win")) {
         var arch = "64";
         if (yamlParams.selectedArchNoFormat === "x86") {
@@ -366,7 +369,6 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             };
 
         } else if (yamlParams.selectedCompiler.startsWith("msvc")) {
-            console.log("Doing " + globalParams.msvcVsDevCm);
             return {
                 compiler: `cl`,
                 compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
