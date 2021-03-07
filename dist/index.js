@@ -417,7 +417,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
         }
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
         let foundCompiler = false;
-        walkForFilesOnly('C:/Program Files (x86)/Microsoft Visual Studio/', ["cl.exe"], function (err, file) {
+        walkForFilesOnly('C:/Program Files (x86)/Microsoft Visual Studio/*/Enterprise', [".exe"], function (err, file) {
             if (err) {
                 return;
             }
