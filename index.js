@@ -359,6 +359,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             };
 
         } else if (yamlParams.selectedCompiler.startsWith("msvc")) {
+            console.log("Doing " + globalParams.msvcVsDevCm);
             return {
                 compiler: `cl`,
                 compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
