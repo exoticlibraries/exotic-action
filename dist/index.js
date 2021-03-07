@@ -363,7 +363,7 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             return {
                 compiler: `cl`,
                 specificCompilerOptions: "",
-                preCompileCommand: `${globalParams.msvcVsDevCmd} && `
+                preCompileCommand: `call "${globalParams.msvcVsDevCmd}" && `
             };
 
         }
