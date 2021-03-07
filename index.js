@@ -16,6 +16,9 @@ const supportedCompilers = [
 ];
 const exoPath = homedir + "/exotic-libraries/";
 const exoIncludePath = homedir + "/exotic-libraries/include/";
+const globalParams = {
+    msvcVsDevCmd: ""
+};
 
 main();
 function main() {
@@ -162,7 +165,8 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
         }
         let {
             compiler, 
-            specificCompilerOptions
+            specificCompilerOptions,
+            preCompileCommand
         } = result;
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
@@ -179,7 +183,7 @@ Compiler Options: ${yamlParams.compilerOptsForTests}
 Runtime Options: ${yamlParams.cesterOpts}
 ===============================================================================================================
         `)
-        var command = `${compiler} ${specificCompilerOptions} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+        var command = `${preCompileCommand} ${compiler} ${specificCompilerOptions} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
         console.log(command);
         try {
             var { error, stdout, stderr } = await jsexec(command);
@@ -321,13 +325,15 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
             if (selectedArchNoFormat === "x86") {
                 return {
                     compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
-                    specificCompilerOptions: ""
+                    specificCompilerOptions: "",
+                    preCompileCommand: ''
                 };
 
             } else {
                 return {
                     compiler: ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
-                    specificCompilerOptions: ""
+                    specificCompilerOptions: "",
+                    preCompileCommand: ''
                 };
 
             }
@@ -335,19 +341,22 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         } else if (selectedCompiler.startsWith("clang")) {
             return {
                 compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
-                specificCompilerOptions: ""
+                specificCompilerOptions: "",
+                preCompileCommand: ''
             };
             
         } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
             return {
                 compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
-                specificCompilerOptions: ""//`-D__BASE_FILE__=\\\"${file}\\\"`
+                specificCompilerOptions: ""/*`-D__BASE_FILE__=\\\"${file}\\\"`*/,
+                preCompileCommand: ''
             };
 
         } else if (selectedCompiler.startsWith("msvc")) {
             return {
                 compiler: `cl`,
-                specificCompilerOptions: ""
+                specificCompilerOptions: "",
+                preCompileCommand: `${globalParams.msvcVsDevCmd} && `
             };
 
         }
@@ -356,19 +365,22 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
         if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
             return {
                 compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc"),
-                specificCompilerOptions: ""
+                specificCompilerOptions: "",
+                preCompileCommand: ''
             };
 
         } else if (selectedCompiler.startsWith("clang")) {
             return {
                 compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang"),
-                specificCompilerOptions: ""
+                specificCompilerOptions: "",
+                preCompileCommand: ''
             };
 
         } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
             return {
                 compiler: selectedCompiler,
-                specificCompilerOptions: ""
+                specificCompilerOptions: "",
+                preCompileCommand: ''
             };
 
         }
@@ -418,7 +430,8 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
                 return false;
             }
             if (file.endsWith("VsDevCmd.bat")) {
-                console.log(">>>>>>>>>>>>>> " + file);
+                globalParams.msvcVsDevCmd = file;
+                foundCompiler = true;
                 return false;
             }
             return true;
