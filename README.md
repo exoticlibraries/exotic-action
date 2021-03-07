@@ -43,6 +43,9 @@ jobs:
           compiler-options-for-tests: |
             -O2 
             -Wall
+          compiler-options-for-tests-msvc: |
+            /I./src
+            /I./include
           regression-cli-options: |
             --show-version
             --verbose
@@ -85,7 +88,7 @@ The `with` portion of the workflow can be configured before the action will work
 | `regression-cli-options` | The multiline string of flags to pass to the compiled executable when running it. | Multiline String | No |
 | `selected-exotic-libraries` | The selected list of exotic libraries to install, if skipped only libcester is installed. | Multiline String | No |
 | `test-exclude-file-pattern-{compiler}` | List of multiline regex strings to match files to skip when searching for test files if the `${compiler}` matches the compiler in the strategy.matrx.compiler. E.g. to exclude some test if the compiler is gcc set `test-exclude-file-pattern-gcc`, to exclude some test when using tcc compiler `test-exclude-file-pattern-tcc` | Multiline Regex | No |
-| `compiler-options-for-tests-{compiler}` | The multiline string of flags to pass to a compiler when compiling the test files. E.g. to pass the flag during compilation if the selected compiler is tcc  `compiler-options-for-tests-tcc` to pass flag to only clang compiler `compiler-options-for-tests-clang` | Multiline String | No |
+| `compiler-options-for-tests-{compiler}` | The multiline string of flags to pass to a compiler when compiling the test files. E.g. to pass the flag during compilation if the selected compiler is tcc  `compiler-options-for-tests-tcc` to pass flag to only msvc compiler `compiler-options-for-tests-msvc`. If the compiler options is specified for a particular compiler the general `compiler-options-for-tests` will be ignored and the compiler specific will be used instead. | Multiline String | No |
 
 ### Output variables
 

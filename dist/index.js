@@ -50,7 +50,7 @@ function main() {
 // TODO: treats install-compilers
 async function afterDownloadDeps(exoIncludePath) {
     const actionOs = getAndSanitizeInputs('matrix.os', 'string', '');
-    const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
+    const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '');
     const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
@@ -165,21 +165,26 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             continue;
         }
         
-        let result = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
+        var outputName = file.replace(/\.[^/.]+$/, "");
+        var prefix = "./";
+        if (process.platform.startsWith("win")) {
+            outputName += ".exe";
+            prefix = "";
+        }
+        let result = selectCompilerExec(yamlParams, fullPath, outputName);
         if (!result) {
             console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the file ${file}`);
             continue;
         }
         let {
             compiler, 
-            specificCompilerOptions,
+            compilationOption,
             preCompileCommand
         } = result;
-        var outputName = file.replace(/\.[^/.]+$/, "");
-        var prefix = "./";
-        if (process.platform.startsWith("win")) {
-            outputName += ".exe";
-            prefix = "";
+        let compilerOptsForTests = getAndSanitizeInputs(`compiler-options-for-tests-${yamlParams.selectedCompiler}`, 'flatten_string', 
+                                                        (yamlParams.selectedCompiler === "msvc" ? " " : ""));
+        if (compilerOptsForTests === "") {
+            compilerOptsForTests = yamlParams.compilerOptsForTests;
         }
         params.numberOfTests++;
         console.log(`
@@ -190,7 +195,7 @@ Compiler Options: ${yamlParams.compilerOptsForTests}
 Runtime Options: ${yamlParams.cesterOpts}
 ===============================================================================================================
         `)
-        var command = `${preCompileCommand} ${compiler} ${specificCompilerOptions} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+        var command = `${preCompileCommand} ${compiler} ${yamlParams.selectedArch} ${compilerOptsForTests} ${compilationOption}`;
         console.log(command);
         try {
             var { error, stdout, stderr } = await jsexec(command);
@@ -322,71 +327,72 @@ function walkForFilesOnly(dir, extensions, callback) {
 };
   
 
-function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
+function selectCompilerExec(yamlParams, fullPath, outputName) {
+    let generalOption = `-I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
     if (process.platform.startsWith("win")) {
         var arch = "64";
-        if (selectedArchNoFormat === "x86") {
+        if (yamlParams.selectedArchNoFormat === "x86") {
             arch = "32";
         }
-        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
-            if (selectedArchNoFormat === "x86") {
+        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
+            if (yamlParams.selectedArchNoFormat === "x86") {
                 return {
                     compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
-                    specificCompilerOptions: "",
+                    compilationOption: generalOption,
                     preCompileCommand: ''
                 };
 
             } else {
                 return {
                     compiler: ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
-                    specificCompilerOptions: "",
+                    compilationOption: generalOption,
                     preCompileCommand: ''
                 };
 
             }
             
-        } else if (selectedCompiler.startsWith("clang")) {
+        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
                 compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
-                specificCompilerOptions: "",
+                compilationOption: generalOption,
                 preCompileCommand: ''
             };
             
-        } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
             return {
                 compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
-                specificCompilerOptions: ""/*`-D__BASE_FILE__=\\\"${file}\\\"`*/,
+                compilationOption: generalOption,
                 preCompileCommand: ''
             };
 
-        } else if (selectedCompiler.startsWith("msvc")) {
+        } else if (yamlParams.selectedCompiler.startsWith("msvc")) {
             return {
                 compiler: `cl`,
-                specificCompilerOptions: "",
+                compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
                 preCompileCommand: `call "${globalParams.msvcVsDevCmd}" && `
             };
 
         }
 
     } else {
-        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
+        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
             return {
                 compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc"),
-                specificCompilerOptions: "",
+                compilationOption: generalOption,
                 preCompileCommand: ''
             };
 
-        } else if (selectedCompiler.startsWith("clang")) {
+        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
                 compiler: (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang"),
-                specificCompilerOptions: "",
+                compilationOption: generalOption,
                 preCompileCommand: ''
             };
 
-        } else if (selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && file.endsWith('c')) {
             return {
-                compiler: selectedCompiler,
-                specificCompilerOptions: "",
+                compiler: yamlParams.selectedCompiler,
+                compilationOption: generalOption,
                 preCompileCommand: ''
             };
 
