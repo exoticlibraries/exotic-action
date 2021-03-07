@@ -513,7 +513,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
                 console.log(command2);
                 exec.exec(command2).then((result) => {
                     if (result === 0) {
-                        if (command2 !== "") {
+                        if (command3 !== "") {
                             console.log(command3);
                             exec.exec(command3).then((result) => {
                                 if (result === 0) {
@@ -525,6 +525,8 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
                                 console.error(error);
                                 callback(false);
                             });
+                        } else {
+                            callback(true);
                         }
                     } else {
                         callback(false);
@@ -533,6 +535,8 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
                     console.error(error);
                     callback(false);
                 });
+            } else {
+                callback(true);
             }
         } else {
             callback(false);
