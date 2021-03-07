@@ -103,7 +103,7 @@ This action is suport the following operating systems.
 
 In your workflow job configuration you can set the runs-on property to any of `macos-latest`, `ubuntu-20.04`, `ubuntu-18.04`, `ubuntu-20.04`, `ubuntu-latest`, `windows-latest` or any variant of the three platform. Both the **x86** and **x64** platform is supported and can be specified in the `matrix.platform` option. If the platform option x86 is specified for macos it is ignored and x64 version of macosx is initialized as the x86 platform is long deprecated. 
 
-The following compiler is supported in the action. 
+The following compilers are supported in the action. 
 
 - gcc
 - clang

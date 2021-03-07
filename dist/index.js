@@ -455,7 +455,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
                 return false;
             }
             return true;
-            
+
         } else {
             console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
             return false;
@@ -484,7 +484,7 @@ function formatArch(selectedCompiler, selectedArch) {
 }
 
 function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
-    var command1 = "", command2 = "";
+    var command1 = "", command2 = "", command3 = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...");
@@ -494,6 +494,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     if (process.platform === "linux" || process.platform === "darwin") {
         command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
         command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
+        command3 = 'sudo apt-get install gcc-multilib g++-multilib';
         
     } else if (process.platform === "win32") {
         command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
@@ -504,13 +505,25 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         return;
     }
     console.log(command1);
-    console.log(command2);
     exec.exec(command1).then((result) => {
         if (result === 0) {
             if (command2 !== "") {
+                console.log(command2);
                 exec.exec(command2).then((result) => {
                     if (result === 0) {
-                        callback(true);
+                        if (command2 !== "") {
+                            console.log(command3);
+                            exec.exec(command3).then((result) => {
+                                if (result === 0) {
+                                    callback(true);
+                                } else {
+                                    callback(false);
+                                }
+                            }).catch((error) => {
+                                console.error(error);
+                                callback(false);
+                            });
+                        }
                     } else {
                         callback(false);
                     }
