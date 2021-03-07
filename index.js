@@ -440,6 +440,7 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actio
             core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
             return false;
         }
+        return true;
     }
     console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
     return false;
