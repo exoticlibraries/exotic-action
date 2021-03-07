@@ -487,7 +487,9 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     if (process.platform === "linux" || process.platform === "darwin") {
         command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
         command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
-        command3 = 'sudo apt-get install gcc-multilib g++-multilib';
+        if (process.platform === "linux") {
+            command3 = 'sudo apt-get install gcc-multilib g++-multilib';
+        }
         
     } else if (process.platform === "win32") {
         command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
