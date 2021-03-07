@@ -380,7 +380,7 @@ function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
     }
 }
 
-async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
+async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs) {
     if (!supportedCompilers.includes(selectedCompiler)) {
         core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
         return false;
