@@ -286,6 +286,27 @@ function strToArray(str, seperator) {
     return str.split(seperator);
 }
 
+var walkForFilesOnly = function(dir, callback) {
+    var results = [];
+    fs.readdir(dir, function(err, list) {
+      if (err) return callback(err);
+      var pending = list.length;
+      if (!pending) return;
+      list.forEach(function(file) {
+        file = path.resolve(dir, file);
+        fs.stat(file, function(err, stat) {
+          if (stat && stat.isDirectory()) {
+            walk(file, callback);
+          } else {
+            callback(null, file);
+            //if (!--pending) callback(null, file);
+          }
+        });
+      });
+    });
+};
+  
+
 function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
     if (process.platform.startsWith("win")) {
         var arch = "64";
@@ -386,17 +407,14 @@ async function validateAndInstallAlternateCompiler(selectedCompiler, arch) {
             return false;
         }
     } else if (selectedCompiler === "msvc" && process.platform === "win32") {
-        var files = fs.readdirSync('C:/Program Files (x86)/Microsoft Visual Studio/');
-        if (!files) {
+        let foundCompiler = false;
+        walkForFilesOnly('C:/Program Files (x86)/Microsoft Visual Studio/', function (err, file) {
+            console.log(">>>>>>>>>>>>>> " + file);
+        });
+        if (!foundCompiler) {
             core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'. Failed to read Microsoft Visual Studio folder`);
             return false;
         }
-        var index;
-        for (index = 0; index < files.length; ++index) {
-            var file = files[index];
-            console.log(">>>>>>>>>>>>>> " + file);
-        }
-        return true;
     }
     console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
     return false;
