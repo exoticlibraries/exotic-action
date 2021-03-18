@@ -10,7 +10,7 @@ on:
 jobs:            
   build-dist:
     runs-on: ${{ matrix.os }}
-    if: github.event_name != 'push' && contains(github.ref, 'refs/heads/main')
+    if: github.event_name != 'push'
     strategy:
       matrix:
         os: [ubuntu-latest]
