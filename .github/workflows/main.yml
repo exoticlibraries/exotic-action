@@ -3,9 +3,9 @@ name: Build dist/index.js
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main-none ]
   pull_request:
-    branches: [ main ]
+    branches: [ main-none ]
 
 jobs:            
   build-dist:
