@@ -10,7 +10,7 @@ on:
 jobs:            
   build-dist:
     runs-on: ${{ matrix.os }}
-    if: github.event_name != 'push'
+    if: github.event_name == 'pull_request'
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -26,29 +26,5 @@ jobs:
           npm install
           sudo npm i -g @vercel/ncc
           npm run build
-            
-  build-and-deploy-gh_pages:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && contains(github.ref, 'refs/heads/main')
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v2.3.1
-        with:
-          persist-credentials: false
-
-      - name: Download NPM Dependencies and Build 🔧
-        run: |
-          npm install
-          sudo npm i -g @vercel/ncc
-          npm run build
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git commit -m "Build dist/index.js" -a
-
-      - name: Deploy 🚀
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GH_TOKEN_FOR_CI_CD }}
-          branch: ${{ github.ref }}
-            
+          if [ "dist/index.js" -nt "index.js" ]; then exit 0; else echo "You need to compile index.js 'ncc build index.js'"; exit 1; fi
         
