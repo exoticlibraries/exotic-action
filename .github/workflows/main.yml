@@ -16,7 +16,10 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v2
         
-      - name: Download NPM Dependencies and Build 🔧
+      - name: Validate dist/index.js is built
         run: |
-          if [ "dist/index.js" -nt "index.js" ]; then exit 0; else echo "You need to compile index.js 'ncc build index.js'"; exit 1; fi
+          npm install
+          sudo npm i -g @vercel/ncc
+          ncc build index.js -o ./dist/ci_compiled.js
+          if cmp -s "dist/ci_compiled/index.js" "dist/index.js"; then echo ""; else echo "You need to compile index.js 'ncc build index.js'" && exit 1; fi
         
