@@ -9,13 +9,8 @@ on:
 
 jobs:            
   build-dist:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        platform: [x64]
-        compiler: [node]
 
     steps:
       - name: Checkout 🛎️
@@ -23,8 +18,5 @@ jobs:
         
       - name: Download NPM Dependencies and Build 🔧
         run: |
-          npm install
-          sudo npm i -g @vercel/ncc
-          npm run build
           if [ "dist/index.js" -nt "index.js" ]; then exit 0; else echo "You need to compile index.js 'ncc build index.js'"; exit 1; fi
         
