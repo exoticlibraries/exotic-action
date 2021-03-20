@@ -46,7 +46,7 @@ jobs:
           git commit -m "Build dist/index.js" -a
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.0.0
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GH_TOKEN_FOR_CI_CD }}
           branch: ${{ github.ref }}
