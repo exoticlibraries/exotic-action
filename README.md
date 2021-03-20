@@ -13,9 +13,9 @@ You can view an example of this below.
 name: CI with C/C++ Exotic Action
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         platform: [x86, x64]
-        compiler: [gnu, clang]
+        compiler: [gnu, clang, tcc, msvc]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -33,6 +33,9 @@ jobs:
         with:
           download-exotic-libraries: true
           run-regression: false
+          selected-exotic-libraries: |
+            libcester@main
+            libxtd@dev
           test-folders: |
             test/
           test-file-pattern: |
@@ -40,6 +43,9 @@ jobs:
           compiler-options-for-tests: |
             -O2 
             -Wall
+          compiler-options-for-tests-msvc: |
+            /I./src
+            /I./include
           regression-cli-options: |
             --show-version
             --verbose
@@ -80,6 +86,9 @@ The `with` portion of the workflow can be configured before the action will work
 | `test-exclude-file-pattern-windows` | List of multiline regex strings to match files to skip on windows os when searching for test files in the test folders. | Multiline Regex | No |
 | `compiler-options-for-tests` | The multiline string of flags to pass to the compiler when compiling the test files. | Multiline String | No |
 | `regression-cli-options` | The multiline string of flags to pass to the compiled executable when running it. | Multiline String | No |
+| `selected-exotic-libraries` | The selected list of exotic libraries to install, if skipped only libcester is installed. | Multiline String | No |
+| `test-exclude-file-pattern-{compiler}` | List of multiline regex strings to match files to skip when searching for test files if the `${compiler}` matches the compiler in the strategy.matrx.compiler. E.g. to exclude some test if the compiler is gcc set `test-exclude-file-pattern-gcc`, to exclude some test when using tcc compiler `test-exclude-file-pattern-tcc` | Multiline Regex | No |
+| `compiler-options-for-tests-{compiler}` | The multiline string of flags to pass to a compiler when compiling the test files. E.g. to pass the flag during compilation if the selected compiler is tcc  `compiler-options-for-tests-tcc` to pass flag to only msvc compiler `compiler-options-for-tests-msvc`. If the compiler options is specified for a particular compiler the general `compiler-options-for-tests` will be ignored and the compiler specific will be used instead. | Multiline String | No |
 
 ### Output variables
 
@@ -94,11 +103,12 @@ This action is suport the following operating systems.
 
 In your workflow job configuration you can set the runs-on property to any of `macos-latest`, `ubuntu-20.04`, `ubuntu-18.04`, `ubuntu-20.04`, `ubuntu-latest`, `windows-latest` or any variant of the three platform. Both the **x86** and **x64** platform is supported and can be specified in the `matrix.platform` option. If the platform option x86 is specified for macos it is ignored and x64 version of macosx is initialized as the x86 platform is long deprecated. 
 
-The following compiler is supported in the action. 
+The following compilers are supported in the action. 
 
 - gcc
 - clang
-- ~cl (Not Yet)~
+- tcc
+- msvc
 
 If any or combination of the compiler above is specified the compiler will be used to compile each test file in the tests folder. 
 
@@ -249,6 +259,13 @@ It optional to download the libraries incase the action is to be used to run reg
 ## Contributing
 
 If you have any issue or you want to request a feature you can open a request [here](https://github.com/exoticlibraries/exotic-action/issues/new/choose) anytime and if you made some changes that should be added to the main project send in a [pull request](https://github.com/exoticlibraries/exotic-action/compare). 
+
+To install ncc and build the distributable dit/index.js file. Never commit the node_modules folder.
+
+```
+npm i -g @vercel/ncc
+ncc build index.js
+```
 
 ## References
 

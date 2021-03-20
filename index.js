@@ -7,14 +7,27 @@ const jsexec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const path = require('path');
 const homedir = require('os').homedir();
+    
+const supportedCompilers = [
+    'gcc',
+    'clang',
+    'tcc',
+    'msvc'
+];
+const exoPath = homedir + "/exotic-libraries/";
+const exoIncludePath = homedir + "/exotic-libraries/include/";
+const globalParams = {
+    msvcVsDevCmd: ""
+};
 
 main();
 function main() {
     const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
+    const selectedExoticLibraries = getAndSanitizeInputs('selected-exotic-libraries', 'flatten_string', 'libcester');
     if (downloadExLibs === true) {
-        downloadExoticLibraries(async function(completed) {
+        downloadExoticLibraries(selectedExoticLibraries, exoIncludePath, async function(completed) {
             if (completed === true) {
-                await afterDownloadDeps();
+                await afterDownloadDeps(exoIncludePath);
             } else {
                 core.setFailed("Failed to download exotic libraries");
                 return;
@@ -22,14 +35,15 @@ function main() {
         });
     } else {
         (async function() {
-            await afterDownloadDeps();
+            await afterDownloadDeps(exoIncludePath);
         })()
     }
 }
 
 // TODO: treats install-compilers
-async function afterDownloadDeps() {
-    const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '-pedantic');
+async function afterDownloadDeps(exoIncludePath) {
+    const actionOs = getAndSanitizeInputs('matrix.os', 'string', '');
+    const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '');
     const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
     const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
     const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
@@ -42,10 +56,12 @@ async function afterDownloadDeps() {
     const testExludeFilePatternsxLinux = getAndSanitizeInputs('test-exclude-file-pattern-linux', 'array', [ ]);
     const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
     const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
-    const selectedArch = formatArch(getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', ""));
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    const exoIncludePath = homedir + "/.yo/include/";
+    const selectedArch = formatArch(selectedCompiler, selectedArchNoFormat);
     
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs))) {
+        return;
+    }
     var params = {
         numberOfTestsRan: 0,
         numberOfFailedTests: 0,
@@ -69,7 +85,7 @@ async function afterDownloadDeps() {
         selectedArchNoFormat: selectedArchNoFormat,
         selectedArch: selectedArch
     }
-    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== "" && (testFolders instanceof Array)) {
+    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== undefined && (testFolders instanceof Array)) {
         var i;
         var j;
         var k;
@@ -82,8 +98,8 @@ async function afterDownloadDeps() {
             try {
                 await iterateFolderAndExecute(folder, params, yamlParams);
             } catch (error) {
-                console.error(error);
-                core.setFailed("Failed to iterate the test folder: " + folder);
+                console.error("Failed to iterate the test folder: " + folder);
+                core.setFailed(error);
                 break;
             }
         }
@@ -138,14 +154,32 @@ async function iterateFolderAndExecute(folder, params, yamlParams) {
             }
         }
         
-        params.numberOfTests++;
-        var compiler = selectCompilerExec(yamlParams.selectedArchNoFormat, yamlParams.selectedCompiler, file);
+        if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
+            continue;
+        }
+        
         var outputName = file.replace(/\.[^/.]+$/, "");
         var prefix = "./";
         if (process.platform.startsWith("win")) {
             outputName += ".exe";
             prefix = "";
         }
+        let result = selectCompilerExec(yamlParams, fullPath, outputName);
+        if (!result) {
+            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the file ${file}`);
+            continue;
+        }
+        let {
+            compiler, 
+            compilationOption,
+            preCompileCommand
+        } = result;
+        let compilerOptsForTests = getAndSanitizeInputs(`compiler-options-for-tests-${yamlParams.selectedCompiler}`, 'flatten_string', 
+                                                        (yamlParams.selectedCompiler === "msvc" ? " " : ""));
+        if (compilerOptsForTests === "") {
+            compilerOptsForTests = yamlParams.compilerOptsForTests;
+        }
+        params.numberOfTests++;
         console.log(`
 ===============================================================================================================
 ${outputName}
@@ -154,7 +188,7 @@ Compiler Options: ${yamlParams.compilerOptsForTests}
 Runtime Options: ${yamlParams.cesterOpts}
 ===============================================================================================================
         `)
-        var command = `${compiler} ${yamlParams.selectedArch} ${yamlParams.compilerOptsForTests} -I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+        var command = `${preCompileCommand} ${compiler} ${yamlParams.selectedArch} ${compilerOptsForTests} ${compilationOption}`;
         console.log(command);
         try {
             var { error, stdout, stderr } = await jsexec(command);
@@ -225,7 +259,7 @@ function matchesInArray(patternArray, text) {
     var k;
     for (k = 0; k < patternArray.length; k++) {
         var pattern = patternArray[k];
-        //console.log(" <==>" + file + " in " + pattern + " is " + (new RegExp(pattern).test(file)));
+        //console.log(" <==>" + text + " in " + pattern + " is " + (new RegExp(pattern).test(text)));
         if (new RegExp(pattern).test(text)) {
             return true;
         }
@@ -254,38 +288,187 @@ function strToArray(str, seperator) {
     return str.split(seperator);
 }
 
-function selectCompilerExec(selectedArchNoFormat, selectedCompiler, file) {
+function walkForFilesOnly(dir, extensions, callback) {
+    var files = fs.readdirSync(dir);
+    if (!files) {
+        return callback(`Unable to read the folder '${dir}'`);
+    }
+    for (let file of files) {
+        file = path.resolve(dir, file);
+        if (fs.lstatSync(file).isDirectory()) {
+            walkForFilesOnly(file, extensions, callback);
+        } else {
+            if (extensions) {
+                let found = false;
+                for (let extension of extensions) {
+                    if (file.endsWith(extension)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    continue;
+                }
+            }
+            if (callback) {
+                if (!callback(null, file)) {
+                    break;
+                }
+            }
+        }
+    }
+};
+  
+
+function selectCompilerExec(yamlParams, fullPath, outputName) {
+    let generalOption = `-I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
     if (process.platform.startsWith("win")) {
         var arch = "64";
-        if (selectedArchNoFormat === "x86") {
+        if (yamlParams.selectedArchNoFormat === "x86") {
             arch = "32";
         }
-        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
-            if (selectedArchNoFormat === "x86") {
-                return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe");
+        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
+            if (yamlParams.selectedArchNoFormat === "x86") {
+                return {
+                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                    compilationOption: generalOption,
+                    preCompileCommand: ''
+                };
+
             } else {
-                return ((file.endsWith('cpp') || file.endsWith('c++')) ? "g++.exe" : "gcc.exe");
+                return {
+                    compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
+                    compilationOption: generalOption,
+                    preCompileCommand: ''
+                };
+
             }
             
-        } else if (selectedCompiler.startsWith("clang")) {
-            return `C:\\msys64\\mingw${arch}\\bin\\` + ((file.endsWith('cpp') || file.endsWith('c++')) ? "clang++.exe" : "clang.exe");
+        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
+            return {
+                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
             
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
+            return {
+                compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        } else if (yamlParams.selectedCompiler.startsWith("msvc")) {
+            return {
+                compiler: `cl`,
+                compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
+                preCompileCommand: `call "${globalParams.msvcVsDevCmd}" -arch=${yamlParams.selectedArchNoFormat} && `
+            };
+
         }
+
     } else {
-        if (selectedCompiler.startsWith("gnu") || selectedCompiler.startsWith("gcc")) {
-            return (file.endsWith('cpp') || file.endsWith('c++') ? "g++" : "gcc");
-        } else if (selectedCompiler.startsWith("clang")) {
-            return (file.endsWith('cpp') || file.endsWith('c++') ? "clang++" : "clang");
+        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
+            return {
+                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "g++" : "gcc"),
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
+            return {
+                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "clang++" : "clang"),
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
+            return {
+                compiler: yamlParams.selectedCompiler,
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
         }
     }
 }
 
-function formatArch(selectedArch) {
-    if (selectedArch == "x64" || selectedArch.endsWith("x64")) {
+async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs) {
+    if (!supportedCompilers.includes(selectedCompiler)) {
+        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+        return false;
+    }
+    if (selectedCompiler === "tcc") {
+        if (process.platform === "linux" && (arch === "x64" || arch === "x86_64")) {
+            var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
+            console.log(stdout); console.log(stderr); console.log(error);
+            return true;
+
+        } else if (process.platform === "win32") {
+            if (!fs.existsSync(exoPath)){
+                fs.mkdirSync(exoPath, { recursive: true });
+            }
+            if (arch.startsWith("x") && arch.endsWith("64")) {
+                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
+                console.log(stdout); console.log(stderr); console.log(error);
+
+            } else if (arch === "x86" || arch == "i386") {
+                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win32-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
+                console.log(stdout); console.log(stderr); console.log(error);
+
+            } else {
+                console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
+                return false;
+            }
+            var { error, stdout, stderr } = await jsexec(`powershell -Command "Expand-Archive '${exoPath}/tcc-win.zip' -DestinationPath '${exoPath}/tcc-win' -Force"`);
+            console.log(stdout); console.log(stderr); console.log(error);
+            return true;
+
+        } else {
+            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
+            return false;
+        }
+    } else if (selectedCompiler === "msvc") {
+        if (process.platform === "win32") {
+            let foundCompiler = false;
+            let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
+            walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise/Common7/Tools/`, [".bat"], function (err, file) {
+                if (err) {
+                    return false;
+                }
+                if (file.endsWith("VsDevCmd.bat")) {
+                    globalParams.msvcVsDevCmd = file;
+                    foundCompiler = true;
+                    return false;
+                }
+                return true;
+            });
+            if (!foundCompiler) {
+                core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
+                return false;
+            }
+            return true;
+
+        } else {
+            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
+            return false;
+        }
+    }
+    return true;
+}
+
+function formatArch(selectedCompiler, selectedArch) {
+    if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) { //x64 and x86_64 - 64 bits
+        if (selectedCompiler === "msvc") {
+            return "";
+        }
         return "-m64";
-    } else if (selectedArch == "x86") {
+    } else if (selectedArch === "x86" || selectedArch == "i386") { //x86 - 32 bits
         if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
             return "-m64";
+        }
+        if (selectedCompiler === "msvc") {
+            return "";
         }
         return "-m32";
     } else {
@@ -293,27 +476,61 @@ function formatArch(selectedArch) {
     }
 }
 
-function downloadExoticLibraries(callback) {
-    var command = "";
+function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
+    var command1 = "", command2 = "", command3 = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
     
-    console.log("Downloading Exotic Libraries...")
+    console.log("Downloading Exotic Libraries...");
+    if (!fs.existsSync(exoIncludePath)){
+        fs.mkdirSync(exoIncludePath, { recursive: true });
+    }
     if (process.platform === "linux" || process.platform === "darwin") {
-        command = "bash " + __dirname + "/../scripts/install.sh " + process.platform + " " + selectedArch + " " + selectedCompiler;
+        command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
+        command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
+        if (process.platform === "linux") {
+            command3 = 'sudo apt-get install gcc-multilib g++-multilib';
+        }
         
     } else if (process.platform === "win32") {
-        command = "powershell " + __dirname + "/../scripts/install.ps1 " + process.platform + " " + selectedArch + " " + selectedCompiler;
+        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
         callback(false);
         return;
     }
-    console.log(command);
-    exec.exec(command).then((result) => {
+    console.log(command1);
+    exec.exec(command1).then((result) => {
         if (result === 0) {
-            callback(true);
+            if (command2 !== "") {
+                console.log(command2);
+                exec.exec(command2).then((result) => {
+                    if (result === 0) {
+                        if (command3 !== "") {
+                            console.log(command3);
+                            exec.exec(command3).then((result) => {
+                                if (result === 0) {
+                                    callback(true);
+                                } else {
+                                    callback(false);
+                                }
+                            }).catch((error) => {
+                                console.error(error);
+                                callback(false);
+                            });
+                        } else {
+                            callback(true);
+                        }
+                    } else {
+                        callback(false);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                    callback(false);
+                });
+            } else {
+                callback(true);
+            }
         } else {
             callback(false);
         }

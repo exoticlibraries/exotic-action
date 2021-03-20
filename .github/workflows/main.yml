@@ -1,0 +1,54 @@
+
+name: Build dist/index.js
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:            
+  build-dist:
+    runs-on: ${{ matrix.os }}
+    if: github.event_name != 'push'
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        platform: [x64]
+        compiler: [node]
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+        
+      - name: Download NPM Dependencies and Build 🔧
+        run: |
+          npm install
+          sudo npm i -g @vercel/ncc
+          npm run build
+            
+  build-and-deploy-gh_pages:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/heads/main')
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+        with:
+          persist-credentials: false
+
+      - name: Download NPM Dependencies and Build 🔧
+        run: |
+          npm install
+          sudo npm i -g @vercel/ncc
+          npm run build
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "Build dist/index.js" -a
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          github_token: ${{ secrets.GH_TOKEN_FOR_CI_CD }}
+          branch: ${{ github.ref }}
+            
+        
