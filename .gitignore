@@ -1,5 +1,6 @@
 
 node_modules/
+*ci_compiled/
 
 *.h
 *.c
