@@ -479,7 +479,7 @@ function formatArch(selectedCompiler, selectedArch) {
 }
 
 function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
-    var command1 = "", command2 = "", command3 = "";
+    var command1 = "", command2 = "", command3 = "", command4 = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...");
@@ -496,6 +496,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         
     } else if (process.platform === "win32") {
         command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
+        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" ${selectedLibs}`;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
