@@ -395,7 +395,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
 }
 
 async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs, runCesterRegression) {
-    if (!runCesterRegression) { return; }
+    if (!runCesterRegression) { return true; }
     if (!supportedCompilers.includes(selectedCompiler)) {
         core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
         return false;
@@ -489,8 +489,9 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     if (process.platform === "linux" || process.platform === "darwin") {
         command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
         command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
+        command3 = `bash ./exotic-install.sh ${selectedLibs}`;
         if (process.platform === "linux") {
-            command3 = 'sudo apt-get install gcc-multilib g++-multilib';
+            command4 = 'sudo apt-get install gcc-multilib g++-multilib';
         }
         
     } else if (process.platform === "win32") {
@@ -512,7 +513,21 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
                             console.log(command3);
                             exec.exec(command3).then((result) => {
                                 if (result === 0) {
-                                    callback(true);
+                                    if (command4 !== "") {
+                                        console.log(command4);
+                                        exec.exec(command4).then((result) => {
+                                            if (result === 0) {
+                                                callback(true);
+                                            } else {
+                                                callback(false);
+                                            }
+                                        }).catch((error) => {
+                                            console.error(error);
+                                            callback(false);
+                                        });
+                                    } else {
+                                        callback(true);
+                                    }
                                 } else {
                                     callback(false);
                                 }
