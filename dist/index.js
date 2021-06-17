@@ -1,569 +1,7 @@
-module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 605:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
-const core = __nccwpck_require__(6246);
-const github = __nccwpck_require__(6156);
-const exec = __nccwpck_require__(7024);
-const util = __nccwpck_require__(1669);
-const jsexec = util.promisify(__nccwpck_require__(3129).exec);
-const fs = __nccwpck_require__(5747);
-const path = __nccwpck_require__(5622);
-const homedir = __nccwpck_require__(2087).homedir();
-    
-const supportedCompilers = [
-    'gcc',
-    'clang',
-    'tcc',
-    'msvc'
-];
-const exoPath = homedir + "/exotic-libraries/";
-const exoIncludePath = homedir + "/exotic-libraries/include/";
-const globalParams = {
-    msvcVsDevCmd: ""
-};
-
-main();
-function main() {
-    const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
-    const selectedExoticLibraries = getAndSanitizeInputs('selected-exotic-libraries', 'flatten_string', 'libcester');
-    if (downloadExLibs === true) {
-        downloadExoticLibraries(selectedExoticLibraries, exoIncludePath, async function(completed) {
-            if (completed === true) {
-                await afterDownloadDeps(exoIncludePath);
-            } else {
-                core.setFailed("Failed to download exotic libraries");
-                return;
-            }
-        });
-    } else {
-        (async function() {
-            await afterDownloadDeps(exoIncludePath);
-        })()
-    }
-}
-
-// TODO: treats install-compilers
-async function afterDownloadDeps(exoIncludePath) {
-    const actionOs = getAndSanitizeInputs('matrix.os', 'string', '');
-    const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '');
-    const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
-    const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
-    const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
-    const testFolderRecursive = getAndSanitizeInputs('test-folder-recursive', 'boolean', false);
-    const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
-    const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
-    const testExludeFilePatternsx86 = getAndSanitizeInputs('test-exclude-file-pattern-x86', 'array', [ ]);
-    const testExludeFilePatternsx64 = getAndSanitizeInputs('test-exclude-file-pattern-x64', 'array', [ ]);
-    const testExludeFilePatternsxMacOS = getAndSanitizeInputs('test-exclude-file-pattern-macos', 'array', [ ]);
-    const testExludeFilePatternsxLinux = getAndSanitizeInputs('test-exclude-file-pattern-linux', 'array', [ ]);
-    const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
-    const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
-    const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    const selectedArch = formatArch(selectedCompiler, selectedArchNoFormat);
-    
-    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs))) {
-        return;
-    }
-    var params = {
-        numberOfTestsRan: 0,
-        numberOfFailedTests: 0,
-        numberOfTests: 0,
-        regressionOutput: "",
-        selectedArchNoFormat: selectedArchNoFormat
-    }
-    var yamlParams = {
-        compilerOptsForTests: compilerOptsForTests,
-        cesterOpts: cesterOpts,
-        testFolderRecursive: testFolderRecursive,
-        testFilePatterns: testFilePatterns,
-        testExludeFilePatterns: testExludeFilePatterns,
-        testExludeFilePatternsx86: testExludeFilePatternsx86,
-        testExludeFilePatternsx64: testExludeFilePatternsx64,
-        testExludeFilePatternsxMacOS: testExludeFilePatternsxMacOS,
-        testExludeFilePatternsxLinux: testExludeFilePatternsxLinux,
-        testExludeFilePatternsxWindows: testExludeFilePatternsxWindows,
-        selectedCompiler: selectedCompiler,
-        exoIncludePath: exoIncludePath,
-        selectedArchNoFormat: selectedArchNoFormat,
-        selectedArch: selectedArch
-    }
-    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== undefined && (testFolders instanceof Array)) {
-        var i;
-        var j;
-        var k;
-        for (i = 0; i < testFolders.length; i++) {
-            var folder = testFolders[i];
-            if (!fs.existsSync(folder) || !fs.lstatSync(folder).isDirectory()) {
-                core.setFailed("The test folder does not exist: " + folder);
-                break;
-            }
-            try {
-                await iterateFolderAndExecute(folder, params, yamlParams);
-            } catch (error) {
-                console.error("Failed to iterate the test folder: " + folder);
-                core.setFailed(error);
-                break;
-            }
-        }
-        reportProgress(params);
-    }
-}
-
-async function iterateFolderAndExecute(folder, params, yamlParams) {
-    var files = fs.readdirSync(folder);
-    if (!files) {
-      core.setFailed("Could not list the content of test folder: " + folder);
-      reportProgress(params);
-      return;
-    }
-    var j;
-    for (j = 0; j < files.length; ++j) {
-        var file = files[j];
-        var fullPath = path.join(folder, file);
-        if (fs.lstatSync(fullPath).isDirectory()) {
-            if (yamlParams.testFolderRecursive === true) {
-                await iterateFolderAndExecute(fullPath, params, yamlParams);
-            }
-            continue;
-        }
-        if (!matchesInArray(yamlParams.testFilePatterns, file)) {
-            continue;
-        }
-        if (matchesInArray(yamlParams.testExludeFilePatterns, file)) {
-            continue;
-        }
-        if (yamlParams.selectedArchNoFormat == "x86") {
-            if (matchesInArray(yamlParams.testExludeFilePatternsx86, file)) {
-                continue;
-            }
-        }
-        if (yamlParams.selectedArchNoFormat.indexOf("x64") !== -1) {
-            if (matchesInArray(yamlParams.testExludeFilePatternsx64, file)) {
-                continue;
-            }
-        }
-        if (process.platform === "darwin") {
-            if (matchesInArray(yamlParams.testExludeFilePatternsxMacOS, file)) {
-                continue;
-            }
-        } else if (process.platform === "linux") {
-            if (matchesInArray(yamlParams.testExludeFilePatternsxLinux, file)) {
-                continue;
-            }
-        } else if (process.platform.startsWith("win")) {
-            if (matchesInArray(yamlParams.testExludeFilePatternsxWindows, file)) {
-                continue;
-            }
-        }
-        
-        if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
-            continue;
-        }
-        
-        var outputName = file.replace(/\.[^/.]+$/, "");
-        var prefix = "./";
-        if (process.platform.startsWith("win")) {
-            outputName += ".exe";
-            prefix = "";
-        }
-        let result = selectCompilerExec(yamlParams, fullPath, outputName);
-        if (!result) {
-            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the file ${file}`);
-            continue;
-        }
-        let {
-            compiler, 
-            compilationOption,
-            preCompileCommand
-        } = result;
-        let compilerOptsForTests = getAndSanitizeInputs(`compiler-options-for-tests-${yamlParams.selectedCompiler}`, 'flatten_string', 
-                                                        (yamlParams.selectedCompiler === "msvc" ? " " : ""));
-        if (compilerOptsForTests === "") {
-            compilerOptsForTests = yamlParams.compilerOptsForTests;
-        }
-        params.numberOfTests++;
-        console.log(`
-===============================================================================================================
-${outputName}
-Compiler: ${compiler}
-Compiler Options: ${yamlParams.compilerOptsForTests}
-Runtime Options: ${yamlParams.cesterOpts}
-===============================================================================================================
-        `)
-        var command = `${preCompileCommand} ${compiler} ${yamlParams.selectedArch} ${compilerOptsForTests} ${compilationOption}`;
-        console.log(command);
-        try {
-            var { error, stdout, stderr } = await jsexec(command);
-            console.log(stdout); console.log(stderr); if (error) { throw error; }
-            var { error, stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
-            console.log(stdout); console.log(stderr); if (error) { throw error; }
-            params.numberOfTestsRan++;
-            params.regressionOutput += `\nPASSED ${outputName}`;
-            try {
-                var { error, stdout, stderr } = await jsexec(`rm ${outputName}`);
-                console.log(stdout); console.log(stderr); console.log(error);
-            } catch (error) { console.log(error) }
-        } catch (error) {
-            params.numberOfFailedTests++;
-            params.numberOfTestsRan++;
-            params.regressionOutput += `\nFAILED ${outputName}`;
-            console.error("Process Error Code " + (error.code ? error.code : "Unknown"))
-            console.error(!error.stdout ? (!error.stderr ? error : error.stderr) : error.stdout);
-            if ((!error.stdout && !error.stderr) || (error.stdout.toString().indexOf("test") === -1 && 
-                                                     error.stderr.toString().indexOf("test") === -1)) {
-                console.error(error);
-            }
-        }
-    }
-}
-
-/**
-    This might fail to callthe afterAll 
-    function though no case now, but case 
-    is expected in future.
-*/
-function reportProgress(params) {
-    if (params.numberOfTestsRan === params.numberOfTests) {
-        afterAll(params);
-    }
-}
-
-function afterAll(params) {
-    try {
-        const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
-        
-        core.setOutput("tests-passed", (params.numberOfFailedTests === 0));
-        core.setOutput("tests-count", params.numberOfTests);
-        core.setOutput("failed-tests-count", params.numberOfFailedTests);
-        core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);    
-        
-        // compilers paths
-        core.setOutput("win32-clang-gcc-folder", "C:\\msys64\\" + ((params.selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
-        if (runCesterRegression === true) {
-            var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
-            console.log("Regression Result:")
-            console.log(params.regressionOutput);
-            console.log(`${percentagePassed}% tests passed, ${params.numberOfFailedTests} tests failed out of ${params.numberOfTests}`);
-            if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
-                throw new Error("Regression test fails. Check the log above for details");
-            }
-        }
-
-        // Get the JSON webhook payload for the event that triggered the workflow
-        const payload = JSON.stringify(github.context.payload, undefined, 2)
-        //console.log(`The event payload: ${payload}`);
-    } catch (error) {
-        core.setFailed(error.message);
-    }
-}
-
-function matchesInArray(patternArray, text) {
-    var k;
-    for (k = 0; k < patternArray.length; k++) {
-        var pattern = patternArray[k];
-        //console.log(" <==>" + text + " in " + pattern + " is " + (new RegExp(pattern).test(text)));
-        if (new RegExp(pattern).test(text)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function getAndSanitizeInputs(key, type, defaultValue) {
-    var value = core.getInput(key);
-    if (!value || value == "") {
-        return defaultValue;
-    }
-    if (type === "boolean") {
-        return value.toUpperCase() === "TRUE" || value;
-    }
-    if (type === "flatten_string") {
-        return value.split('\n').join(' ');
-    }
-    if (type === "array" && (typeof value == "string")) {
-        return strToArray(value, '\n');
-    }
-    return value;
-}
-
-function strToArray(str, seperator) {
-    return str.split(seperator);
-}
-
-function walkForFilesOnly(dir, extensions, callback) {
-    var files = fs.readdirSync(dir);
-    if (!files) {
-        return callback(`Unable to read the folder '${dir}'`);
-    }
-    for (let file of files) {
-        file = path.resolve(dir, file);
-        if (fs.lstatSync(file).isDirectory()) {
-            walkForFilesOnly(file, extensions, callback);
-        } else {
-            if (extensions) {
-                let found = false;
-                for (let extension of extensions) {
-                    if (file.endsWith(extension)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    continue;
-                }
-            }
-            if (callback) {
-                if (!callback(null, file)) {
-                    break;
-                }
-            }
-        }
-    }
-};
-  
-
-function selectCompilerExec(yamlParams, fullPath, outputName) {
-    let generalOption = `-I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
-    if (process.platform.startsWith("win")) {
-        var arch = "64";
-        if (yamlParams.selectedArchNoFormat === "x86") {
-            arch = "32";
-        }
-        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
-            if (yamlParams.selectedArchNoFormat === "x86") {
-                return {
-                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
-                    compilationOption: generalOption,
-                    preCompileCommand: ''
-                };
-
-            } else {
-                return {
-                    compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
-                    compilationOption: generalOption,
-                    preCompileCommand: ''
-                };
-
-            }
-            
-        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
-            return {
-                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
-                compilationOption: generalOption,
-                preCompileCommand: ''
-            };
-            
-        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
-            return {
-                compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
-                compilationOption: generalOption,
-                preCompileCommand: ''
-            };
-
-        } else if (yamlParams.selectedCompiler.startsWith("msvc")) {
-            return {
-                compiler: `cl`,
-                compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
-                preCompileCommand: `call "${globalParams.msvcVsDevCmd}" -arch=${yamlParams.selectedArchNoFormat} && `
-            };
-
-        }
-
-    } else {
-        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
-            return {
-                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "g++" : "gcc"),
-                compilationOption: generalOption,
-                preCompileCommand: ''
-            };
-
-        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
-            return {
-                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "clang++" : "clang"),
-                compilationOption: generalOption,
-                preCompileCommand: ''
-            };
-
-        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
-            return {
-                compiler: yamlParams.selectedCompiler,
-                compilationOption: generalOption,
-                preCompileCommand: ''
-            };
-
-        }
-    }
-}
-
-async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs) {
-    if (!supportedCompilers.includes(selectedCompiler)) {
-        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
-        return false;
-    }
-    if (selectedCompiler === "tcc") {
-        if (process.platform === "linux" && (arch === "x64" || arch === "x86_64")) {
-            var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
-            console.log(stdout); console.log(stderr); console.log(error);
-            return true;
-
-        } else if (process.platform === "win32") {
-            if (!fs.existsSync(exoPath)){
-                fs.mkdirSync(exoPath, { recursive: true });
-            }
-            if (arch.startsWith("x") && arch.endsWith("64")) {
-                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
-                console.log(stdout); console.log(stderr); console.log(error);
-
-            } else if (arch === "x86" || arch == "i386") {
-                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win32-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
-                console.log(stdout); console.log(stderr); console.log(error);
-
-            } else {
-                console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
-                return false;
-            }
-            var { error, stdout, stderr } = await jsexec(`powershell -Command "Expand-Archive '${exoPath}/tcc-win.zip' -DestinationPath '${exoPath}/tcc-win' -Force"`);
-            console.log(stdout); console.log(stderr); console.log(error);
-            return true;
-
-        } else {
-            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
-            return false;
-        }
-    } else if (selectedCompiler === "msvc") {
-        if (process.platform === "win32") {
-            let foundCompiler = false;
-            let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
-            walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise/Common7/Tools/`, [".bat"], function (err, file) {
-                if (err) {
-                    return false;
-                }
-                if (file.endsWith("VsDevCmd.bat")) {
-                    globalParams.msvcVsDevCmd = file;
-                    foundCompiler = true;
-                    return false;
-                }
-                return true;
-            });
-            if (!foundCompiler) {
-                core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
-                return false;
-            }
-            return true;
-
-        } else {
-            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
-            return false;
-        }
-    }
-    return true;
-}
-
-function formatArch(selectedCompiler, selectedArch) {
-    if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) { //x64 and x86_64 - 64 bits
-        if (selectedCompiler === "msvc") {
-            return "";
-        }
-        return "-m64";
-    } else if (selectedArch === "x86" || selectedArch == "i386") { //x86 - 32 bits
-        if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
-            return "-m64";
-        }
-        if (selectedCompiler === "msvc") {
-            return "";
-        }
-        return "-m32";
-    } else {
-        return "-march=" + selectedArch;
-    }
-}
-
-function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
-    var command1 = "", command2 = "", command3 = "";
-    const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
-    
-    console.log("Downloading Exotic Libraries...");
-    if (!fs.existsSync(exoIncludePath)){
-        fs.mkdirSync(exoIncludePath, { recursive: true });
-    }
-    if (process.platform === "linux" || process.platform === "darwin") {
-        command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
-        command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
-        if (process.platform === "linux") {
-            command3 = 'sudo apt-get install gcc-multilib g++-multilib';
-        }
-        
-    } else if (process.platform === "win32") {
-        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
-        
-    } else {
-        console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
-        callback(false);
-        return;
-    }
-    console.log(command1);
-    exec.exec(command1).then((result) => {
-        if (result === 0) {
-            if (command2 !== "") {
-                console.log(command2);
-                exec.exec(command2).then((result) => {
-                    if (result === 0) {
-                        if (command3 !== "") {
-                            console.log(command3);
-                            exec.exec(command3).then((result) => {
-                                if (result === 0) {
-                                    callback(true);
-                                } else {
-                                    callback(false);
-                                }
-                            }).catch((error) => {
-                                console.error(error);
-                                callback(false);
-                            });
-                        } else {
-                            callback(true);
-                        }
-                    } else {
-                        callback(false);
-                    }
-                }).catch((error) => {
-                    console.error(error);
-                    callback(false);
-                });
-            } else {
-                callback(true);
-            }
-        } else {
-            callback(false);
-        }
-    }).catch((error) => {
-        console.error(error);
-        callback(false);
-    });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/***/ }),
-
-/***/ 277:
+/***/ 9403:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -577,7 +15,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const os = __importStar(__nccwpck_require__(2087));
-const utils_1 = __nccwpck_require__(4315);
+const utils_1 = __nccwpck_require__(4163);
 /**
  * Commands
  *
@@ -649,7 +87,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 6246:
+/***/ 8021:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -671,9 +109,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __nccwpck_require__(277);
-const file_command_1 = __nccwpck_require__(4968);
-const utils_1 = __nccwpck_require__(4315);
+const command_1 = __nccwpck_require__(9403);
+const file_command_1 = __nccwpck_require__(1704);
+const utils_1 = __nccwpck_require__(4163);
 const os = __importStar(__nccwpck_require__(2087));
 const path = __importStar(__nccwpck_require__(5622));
 /**
@@ -894,7 +332,7 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 4968:
+/***/ 1704:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -912,7 +350,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(5747));
 const os = __importStar(__nccwpck_require__(2087));
-const utils_1 = __nccwpck_require__(4315);
+const utils_1 = __nccwpck_require__(4163);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -930,7 +368,7 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
-/***/ 4315:
+/***/ 4163:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -956,7 +394,7 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 7024:
+/***/ 2272:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -978,7 +416,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tr = __importStar(__nccwpck_require__(8805));
+const tr = __importStar(__nccwpck_require__(3804));
 /**
  * Exec a command.
  * Output will be streamed to the live console.
@@ -1007,7 +445,7 @@ exports.exec = exec;
 
 /***/ }),
 
-/***/ 8805:
+/***/ 3804:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1033,8 +471,8 @@ const os = __importStar(__nccwpck_require__(2087));
 const events = __importStar(__nccwpck_require__(8614));
 const child = __importStar(__nccwpck_require__(3129));
 const path = __importStar(__nccwpck_require__(5622));
-const io = __importStar(__nccwpck_require__(1790));
-const ioUtil = __importStar(__nccwpck_require__(4621));
+const io = __importStar(__nccwpck_require__(2541));
+const ioUtil = __importStar(__nccwpck_require__(2417));
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
 /*
@@ -1614,7 +1052,7 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 4960:
+/***/ 466:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -1671,7 +1109,7 @@ exports.Context = Context;
 
 /***/ }),
 
-/***/ 6156:
+/***/ 4366:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1697,8 +1135,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(4960));
-const utils_1 = __nccwpck_require__(8640);
+const Context = __importStar(__nccwpck_require__(466));
+const utils_1 = __nccwpck_require__(4862);
 exports.context = new Context.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
@@ -1714,7 +1152,7 @@ exports.getOctokit = getOctokit;
 
 /***/ }),
 
-/***/ 8680:
+/***/ 9574:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1740,7 +1178,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
-const httpClient = __importStar(__nccwpck_require__(195));
+const httpClient = __importStar(__nccwpck_require__(9189));
 function getAuthString(token, options) {
     if (!token && !options.auth) {
         throw new Error('Parameter token or opts.auth is required');
@@ -1764,7 +1202,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 
-/***/ 8640:
+/***/ 4862:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1790,12 +1228,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(4960));
-const Utils = __importStar(__nccwpck_require__(8680));
+const Context = __importStar(__nccwpck_require__(466));
+const Utils = __importStar(__nccwpck_require__(9574));
 // octokit + plugins
-const core_1 = __nccwpck_require__(7839);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(7341);
-const plugin_paginate_rest_1 = __nccwpck_require__(1290);
+const core_1 = __nccwpck_require__(3362);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(5534);
+const plugin_paginate_rest_1 = __nccwpck_require__(8433);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
 const defaults = {
@@ -1825,7 +1263,7 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 195:
+/***/ 9189:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -1834,7 +1272,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const url = __nccwpck_require__(8835);
 const http = __nccwpck_require__(8605);
 const https = __nccwpck_require__(7211);
-const pm = __nccwpck_require__(6119);
+const pm = __nccwpck_require__(2851);
 let tunnel;
 var HttpCodes;
 (function (HttpCodes) {
@@ -2244,7 +1682,7 @@ class HttpClient {
         if (useProxy) {
             // If using proxy, need tunnel
             if (!tunnel) {
-                tunnel = __nccwpck_require__(7849);
+                tunnel = __nccwpck_require__(4494);
             }
             const agentOptions = {
                 maxSockets: maxSockets,
@@ -2364,7 +1802,7 @@ exports.HttpClient = HttpClient;
 
 /***/ }),
 
-/***/ 6119:
+/***/ 2851:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -2430,7 +1868,7 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
-/***/ 4621:
+/***/ 2417:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2632,7 +2070,7 @@ function isUnixExecutable(stats) {
 
 /***/ }),
 
-/***/ 1790:
+/***/ 2541:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2650,7 +2088,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const childProcess = __nccwpck_require__(3129);
 const path = __nccwpck_require__(5622);
 const util_1 = __nccwpck_require__(1669);
-const ioUtil = __nccwpck_require__(4621);
+const ioUtil = __nccwpck_require__(2417);
 const exec = util_1.promisify(childProcess.exec);
 /**
  * Copies a file or folder.
@@ -2929,7 +2367,7 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
-/***/ 1461:
+/***/ 704:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -2986,7 +2424,7 @@ exports.createTokenAuth = createTokenAuth;
 
 /***/ }),
 
-/***/ 7839:
+/***/ 3362:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -2994,11 +2432,11 @@ exports.createTokenAuth = createTokenAuth;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var universalUserAgent = __nccwpck_require__(5192);
-var beforeAfterHook = __nccwpck_require__(7794);
-var request = __nccwpck_require__(2896);
-var graphql = __nccwpck_require__(65);
-var authToken = __nccwpck_require__(1461);
+var universalUserAgent = __nccwpck_require__(6403);
+var beforeAfterHook = __nccwpck_require__(2218);
+var request = __nccwpck_require__(6422);
+var graphql = __nccwpck_require__(6278);
+var authToken = __nccwpck_require__(704);
 
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -3170,7 +2608,7 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 959:
+/***/ 143:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -3180,8 +2618,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var isPlainObject = _interopDefault(__nccwpck_require__(1053));
-var universalUserAgent = __nccwpck_require__(5192);
+var isPlainObject = _interopDefault(__nccwpck_require__(4009));
+var universalUserAgent = __nccwpck_require__(6403);
 
 function lowercaseKeys(object) {
   if (!object) {
@@ -3557,7 +2995,7 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 65:
+/***/ 6278:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -3565,8 +3003,8 @@ exports.endpoint = endpoint;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var request = __nccwpck_require__(2896);
-var universalUserAgent = __nccwpck_require__(5192);
+var request = __nccwpck_require__(6422);
+var universalUserAgent = __nccwpck_require__(6403);
 
 const VERSION = "4.5.1";
 
@@ -3650,7 +3088,7 @@ exports.withCustomRequest = withCustomRequest;
 
 /***/ }),
 
-/***/ 1290:
+/***/ 8433:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3788,7 +3226,7 @@ exports.paginateRest = paginateRest;
 
 /***/ }),
 
-/***/ 7341:
+/***/ 5534:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4978,7 +4416,7 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
-/***/ 8810:
+/***/ 8603:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -4988,8 +4426,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var deprecation = __nccwpck_require__(2285);
-var once = _interopDefault(__nccwpck_require__(3235));
+var deprecation = __nccwpck_require__(4761);
+var once = _interopDefault(__nccwpck_require__(1352));
 
 const logOnce = once(deprecation => console.warn(deprecation));
 /**
@@ -5041,7 +4479,7 @@ exports.RequestError = RequestError;
 
 /***/ }),
 
-/***/ 2896:
+/***/ 6422:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -5051,11 +4489,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __nccwpck_require__(959);
-var universalUserAgent = __nccwpck_require__(5192);
-var isPlainObject = _interopDefault(__nccwpck_require__(1053));
-var nodeFetch = _interopDefault(__nccwpck_require__(3039));
-var requestError = __nccwpck_require__(8810);
+var endpoint = __nccwpck_require__(143);
+var universalUserAgent = __nccwpck_require__(6403);
+var isPlainObject = _interopDefault(__nccwpck_require__(4009));
+var nodeFetch = _interopDefault(__nccwpck_require__(3032));
+var requestError = __nccwpck_require__(8603);
 
 const VERSION = "5.4.5";
 
@@ -5197,12 +4635,12 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 7794:
+/***/ 2218:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __nccwpck_require__(7475)
-var addHook = __nccwpck_require__(5862)
-var removeHook = __nccwpck_require__(7133)
+var register = __nccwpck_require__(6523)
+var addHook = __nccwpck_require__(3)
+var removeHook = __nccwpck_require__(6693)
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
 var bind = Function.bind
@@ -5261,7 +4699,7 @@ module.exports.Collection = Hook.Collection
 
 /***/ }),
 
-/***/ 5862:
+/***/ 3:
 /***/ ((module) => {
 
 module.exports = addHook
@@ -5314,7 +4752,7 @@ function addHook (state, kind, name, hook) {
 
 /***/ }),
 
-/***/ 7475:
+/***/ 6523:
 /***/ ((module) => {
 
 module.exports = register
@@ -5349,7 +4787,7 @@ function register (state, name, method, options) {
 
 /***/ }),
 
-/***/ 7133:
+/***/ 6693:
 /***/ ((module) => {
 
 module.exports = removeHook
@@ -5373,15 +4811,15 @@ function removeHook (state, name, method) {
 
 /***/ }),
 
-/***/ 8546:
+/***/ 6548:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 const cp = __nccwpck_require__(3129);
-const parse = __nccwpck_require__(683);
-const enoent = __nccwpck_require__(7108);
+const parse = __nccwpck_require__(4989);
+const enoent = __nccwpck_require__(7845);
 
 function spawn(command, args, options) {
     // Parse the arguments
@@ -5420,7 +4858,7 @@ module.exports._enoent = enoent;
 
 /***/ }),
 
-/***/ 7108:
+/***/ 7845:
 /***/ ((module) => {
 
 "use strict";
@@ -5487,18 +4925,18 @@ module.exports = {
 
 /***/ }),
 
-/***/ 683:
+/***/ 4989:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 const path = __nccwpck_require__(5622);
-const niceTry = __nccwpck_require__(3997);
-const resolveCommand = __nccwpck_require__(8247);
-const escape = __nccwpck_require__(2245);
-const readShebang = __nccwpck_require__(7636);
-const semver = __nccwpck_require__(1028);
+const niceTry = __nccwpck_require__(9321);
+const resolveCommand = __nccwpck_require__(7745);
+const escape = __nccwpck_require__(4974);
+const readShebang = __nccwpck_require__(1767);
+const semver = __nccwpck_require__(6315);
 
 const isWin = process.platform === 'win32';
 const isExecutableRegExp = /\.(?:com|exe)$/i;
@@ -5620,7 +5058,7 @@ module.exports = parse;
 
 /***/ }),
 
-/***/ 2245:
+/***/ 4974:
 /***/ ((module) => {
 
 "use strict";
@@ -5673,14 +5111,14 @@ module.exports.argument = escapeArgument;
 
 /***/ }),
 
-/***/ 7636:
+/***/ 1767:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 const fs = __nccwpck_require__(5747);
-const shebangCommand = __nccwpck_require__(3140);
+const shebangCommand = __nccwpck_require__(8456);
 
 function readShebang(command) {
     // Read the first 150 bytes from the file
@@ -5713,15 +5151,15 @@ module.exports = readShebang;
 
 /***/ }),
 
-/***/ 8247:
+/***/ 7745:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 const path = __nccwpck_require__(5622);
-const which = __nccwpck_require__(7874);
-const pathKey = __nccwpck_require__(8001)();
+const which = __nccwpck_require__(9219);
+const pathKey = __nccwpck_require__(1196)();
 
 function resolveCommandAttempt(parsed, withoutPathExt) {
     const cwd = process.cwd();
@@ -5768,7 +5206,7 @@ module.exports = resolveCommand;
 
 /***/ }),
 
-/***/ 2285:
+/***/ 4761:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -5796,10 +5234,10 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 6963:
+/***/ 461:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var once = __nccwpck_require__(3235);
+var once = __nccwpck_require__(1352);
 
 var noop = function() {};
 
@@ -5897,22 +5335,22 @@ module.exports = eos;
 
 /***/ }),
 
-/***/ 3377:
+/***/ 3269:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 const path = __nccwpck_require__(5622);
 const childProcess = __nccwpck_require__(3129);
-const crossSpawn = __nccwpck_require__(8546);
-const stripEof = __nccwpck_require__(4992);
-const npmRunPath = __nccwpck_require__(5746);
-const isStream = __nccwpck_require__(680);
-const _getStream = __nccwpck_require__(8017);
-const pFinally = __nccwpck_require__(3582);
-const onExit = __nccwpck_require__(9060);
-const errname = __nccwpck_require__(5989);
-const stdio = __nccwpck_require__(6364);
+const crossSpawn = __nccwpck_require__(6548);
+const stripEof = __nccwpck_require__(5042);
+const npmRunPath = __nccwpck_require__(2656);
+const isStream = __nccwpck_require__(8406);
+const _getStream = __nccwpck_require__(4623);
+const pFinally = __nccwpck_require__(1856);
+const onExit = __nccwpck_require__(49);
+const errname = __nccwpck_require__(4692);
+const stdio = __nccwpck_require__(7904);
 
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 
@@ -6266,7 +5704,7 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 /***/ }),
 
-/***/ 5989:
+/***/ 4692:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6313,7 +5751,7 @@ function errname(uv, code) {
 
 /***/ }),
 
-/***/ 6364:
+/***/ 7904:
 /***/ ((module) => {
 
 "use strict";
@@ -6362,7 +5800,7 @@ module.exports = opts => {
 
 /***/ }),
 
-/***/ 1057:
+/***/ 4078:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6421,13 +5859,13 @@ module.exports = options => {
 
 /***/ }),
 
-/***/ 8017:
+/***/ 4623:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
-const pump = __nccwpck_require__(5346);
-const bufferStream = __nccwpck_require__(1057);
+const pump = __nccwpck_require__(2171);
+const bufferStream = __nccwpck_require__(4078);
 
 class MaxBufferError extends Error {
 	constructor() {
@@ -6479,7 +5917,7 @@ module.exports.MaxBufferError = MaxBufferError;
 
 /***/ }),
 
-/***/ 1053:
+/***/ 4009:
 /***/ ((module) => {
 
 "use strict";
@@ -6535,7 +5973,7 @@ module.exports = isPlainObject;
 
 /***/ }),
 
-/***/ 680:
+/***/ 8406:
 /***/ ((module) => {
 
 "use strict";
@@ -6564,15 +6002,15 @@ isStream.transform = function (stream) {
 
 /***/ }),
 
-/***/ 8188:
+/***/ 9380:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var fs = __nccwpck_require__(5747)
 var core
 if (process.platform === 'win32' || global.TESTING_WINDOWS) {
-  core = __nccwpck_require__(4674)
+  core = __nccwpck_require__(8026)
 } else {
-  core = __nccwpck_require__(7484)
+  core = __nccwpck_require__(267)
 }
 
 module.exports = isexe
@@ -6628,7 +6066,7 @@ function sync (path, options) {
 
 /***/ }),
 
-/***/ 7484:
+/***/ 267:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 module.exports = isexe
@@ -6676,7 +6114,7 @@ function checkMode (stat, options) {
 
 /***/ }),
 
-/***/ 4674:
+/***/ 8026:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 module.exports = isexe
@@ -6725,7 +6163,7 @@ function sync (path, options) {
 
 /***/ }),
 
-/***/ 1108:
+/***/ 1875:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6769,7 +6207,7 @@ module.exports.default = macosRelease;
 
 /***/ }),
 
-/***/ 3997:
+/***/ 9321:
 /***/ ((module) => {
 
 "use strict";
@@ -6788,7 +6226,7 @@ module.exports = function(fn) {
 
 /***/ }),
 
-/***/ 3039:
+/***/ 3032:
 /***/ ((module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6953,7 +6391,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = __nccwpck_require__(9252).convert;
+	convert = __nccwpck_require__(9217).convert;
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -7259,6 +6697,12 @@ function convertBody(buffer, headers) {
 	// html4
 	if (!res && str) {
 		res = /<meta[\s]+?http-equiv=(['"])content-type\1[\s]+?content=(['"])(.+?)\2/i.exec(str);
+		if (!res) {
+			res = /<meta[\s]+?content=(['"])(.+?)\1[\s]+?http-equiv=(['"])content-type\3/i.exec(str);
+			if (res) {
+				res.pop(); // drop last quote
+			}
+		}
 
 		if (res) {
 			res = /charset=(.*)/i.exec(res.pop());
@@ -8266,7 +7710,7 @@ function fetch(url, opts) {
 				// HTTP fetch step 5.5
 				switch (request.redirect) {
 					case 'error':
-						reject(new FetchError(`redirect mode is set to error: ${request.url}`, 'no-redirect'));
+						reject(new FetchError(`uri requested responds with a redirect, redirect mode is set to error: ${request.url}`, 'no-redirect'));
 						finalize();
 						return;
 					case 'manual':
@@ -8305,7 +7749,8 @@ function fetch(url, opts) {
 							method: request.method,
 							body: request.body,
 							signal: request.signal,
-							timeout: request.timeout
+							timeout: request.timeout,
+							size: request.size
 						};
 
 						// HTTP-redirect fetch step 9
@@ -8438,13 +7883,13 @@ exports.FetchError = FetchError;
 
 /***/ }),
 
-/***/ 5746:
+/***/ 2656:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 const path = __nccwpck_require__(5622);
-const pathKey = __nccwpck_require__(8001);
+const pathKey = __nccwpck_require__(1196);
 
 module.exports = opts => {
 	opts = Object.assign({
@@ -8485,10 +7930,10 @@ module.exports.env = opts => {
 
 /***/ }),
 
-/***/ 3235:
+/***/ 1352:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var wrappy = __nccwpck_require__(8445)
+var wrappy = __nccwpck_require__(5212)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -8534,14 +7979,14 @@ function onceStrict (fn) {
 
 /***/ }),
 
-/***/ 7773:
+/***/ 8708:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 const os = __nccwpck_require__(2087);
-const macosRelease = __nccwpck_require__(1108);
-const winRelease = __nccwpck_require__(2758);
+const macosRelease = __nccwpck_require__(1875);
+const winRelease = __nccwpck_require__(5118);
 
 const osName = (platform, release) => {
 	if (!platform && release) {
@@ -8588,7 +8033,7 @@ module.exports = osName;
 
 /***/ }),
 
-/***/ 3582:
+/***/ 1856:
 /***/ ((module) => {
 
 "use strict";
@@ -8611,7 +8056,7 @@ module.exports = (promise, onFinally) => {
 
 /***/ }),
 
-/***/ 8001:
+/***/ 1196:
 /***/ ((module) => {
 
 "use strict";
@@ -8632,11 +8077,11 @@ module.exports = opts => {
 
 /***/ }),
 
-/***/ 5346:
+/***/ 2171:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var once = __nccwpck_require__(3235)
-var eos = __nccwpck_require__(6963)
+var once = __nccwpck_require__(1352)
+var eos = __nccwpck_require__(461)
 var fs = __nccwpck_require__(5747) // we only need fs to get the ReadStream and WriteStream prototypes
 
 var noop = function () {}
@@ -8721,7 +8166,7 @@ module.exports = pump
 
 /***/ }),
 
-/***/ 1028:
+/***/ 6315:
 /***/ ((module, exports) => {
 
 exports = module.exports = SemVer
@@ -10211,12 +9656,12 @@ function coerce (version) {
 
 /***/ }),
 
-/***/ 3140:
+/***/ 8456:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
-var shebangRegex = __nccwpck_require__(4610);
+var shebangRegex = __nccwpck_require__(6719);
 
 module.exports = function (str) {
 	var match = str.match(shebangRegex);
@@ -10238,7 +9683,7 @@ module.exports = function (str) {
 
 /***/ }),
 
-/***/ 4610:
+/***/ 6719:
 /***/ ((module) => {
 
 "use strict";
@@ -10248,14 +9693,14 @@ module.exports = /^#!.*/;
 
 /***/ }),
 
-/***/ 9060:
+/***/ 49:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // Note: since nyc uses this module to output coverage, any lines
 // that are in the direct sync flow of nyc's outputCoverage are
 // ignored, since we can never get coverage for them.
 var assert = __nccwpck_require__(2357)
-var signals = __nccwpck_require__(8544)
+var signals = __nccwpck_require__(4810)
 var isWin = /^win/i.test(process.platform)
 
 var EE = __nccwpck_require__(8614)
@@ -10418,7 +9863,7 @@ function processEmit (ev, arg) {
 
 /***/ }),
 
-/***/ 8544:
+/***/ 4810:
 /***/ ((module) => {
 
 // This is not the set of all possible signals.
@@ -10478,7 +9923,7 @@ if (process.platform === 'linux') {
 
 /***/ }),
 
-/***/ 4992:
+/***/ 5042:
 /***/ ((module) => {
 
 "use strict";
@@ -10501,15 +9946,15 @@ module.exports = function (x) {
 
 /***/ }),
 
-/***/ 7849:
+/***/ 4494:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-module.exports = __nccwpck_require__(4597);
+module.exports = __nccwpck_require__(2955);
 
 
 /***/ }),
 
-/***/ 4597:
+/***/ 2955:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -10781,7 +10226,7 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 5192:
+/***/ 6403:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -10791,7 +10236,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var osName = _interopDefault(__nccwpck_require__(7773));
+var osName = _interopDefault(__nccwpck_require__(8708));
 
 function getUserAgent() {
   try {
@@ -10811,7 +10256,7 @@ exports.getUserAgent = getUserAgent;
 
 /***/ }),
 
-/***/ 7874:
+/***/ 9219:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 module.exports = which
@@ -10823,7 +10268,7 @@ var isWindows = process.platform === 'win32' ||
 
 var path = __nccwpck_require__(5622)
 var COLON = isWindows ? ';' : ':'
-var isexe = __nccwpck_require__(8188)
+var isexe = __nccwpck_require__(9380)
 
 function getNotFoundError (cmd) {
   var er = new Error('not found: ' + cmd)
@@ -10953,13 +10398,13 @@ function whichSync (cmd, opt) {
 
 /***/ }),
 
-/***/ 2758:
+/***/ 5118:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 const os = __nccwpck_require__(2087);
-const execa = __nccwpck_require__(3377);
+const execa = __nccwpck_require__(3269);
 
 // Reference: https://www.gaijin.at/en/lstwinver.php
 const names = new Map([
@@ -11013,7 +10458,7 @@ module.exports = windowsRelease;
 
 /***/ }),
 
-/***/ 8445:
+/***/ 5212:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -11053,7 +10498,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 9252:
+/***/ 9217:
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
@@ -11181,8 +10626,9 @@ module.exports = require("zlib");;
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -11207,10 +10653,584 @@ module.exports = require("zlib");;
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	__nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(605);
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+
+const core = __nccwpck_require__(8021);
+const github = __nccwpck_require__(4366);
+const exec = __nccwpck_require__(2272);
+const util = __nccwpck_require__(1669);
+const jsexec = util.promisify(__nccwpck_require__(3129).exec);
+const fs = __nccwpck_require__(5747);
+const path = __nccwpck_require__(5622);
+const homedir = __nccwpck_require__(2087).homedir();
+    
+const supportedCompilers = [
+    'gnu',
+    'gcc',
+    'clang',
+    'tcc',
+    'msvc'
+];
+const exoPath = homedir + "/exotic-libraries/";
+const exoIncludePath = homedir + "/exotic-libraries/include/";
+const globalParams = {
+    msvcVsDevCmd: ""
+};
+
+main();
+function main() {
+    const downloadExLibs = getAndSanitizeInputs('download-exotic-libraries', 'boolean', true);
+    const selectedExoticLibraries = getAndSanitizeInputs('selected-exotic-libraries', 'flatten_string', 'libcester');
+    if (downloadExLibs === true) {
+        downloadExoticLibraries(selectedExoticLibraries, exoIncludePath, async function(completed) {
+            if (completed === true) {
+                await afterDownloadDeps(exoIncludePath);
+            } else {
+                core.setFailed("Failed to download exotic libraries");
+                return;
+            }
+        });
+    } else {
+        (async function() {
+            await afterDownloadDeps(exoIncludePath);
+        })()
+    }
+}
+
+// TODO: treats install-compilers
+async function afterDownloadDeps(exoIncludePath) {
+    const actionOs = getAndSanitizeInputs('matrix.os', 'string', '');
+    const compilerOptsForTests = getAndSanitizeInputs('compiler-options-for-tests', 'flatten_string', '');
+    const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
+    const cesterOpts = getAndSanitizeInputs('regression-cli-options', 'flatten_string', ['--cester-verbose --cester-nomemtest', '--cester-printversion']);
+    const testFolders = getAndSanitizeInputs('test-folders', 'array', [ 'test/', 'tests/' ]);
+    const testFolderRecursive = getAndSanitizeInputs('test-folder-recursive', 'boolean', false);
+    const testFilePatterns = getAndSanitizeInputs('test-file-pattern', 'array', [ '^test_', '_test[.c](c\+\+|cpp|c)' ]);
+    const testExludeFilePatterns = getAndSanitizeInputs('test-exclude-file-pattern', 'array', [ ]);
+    const testExludeFilePatternsx86 = getAndSanitizeInputs('test-exclude-file-pattern-x86', 'array', [ ]);
+    const testExludeFilePatternsx64 = getAndSanitizeInputs('test-exclude-file-pattern-x64', 'array', [ ]);
+    const testExludeFilePatternsxMacOS = getAndSanitizeInputs('test-exclude-file-pattern-macos', 'array', [ ]);
+    const testExludeFilePatternsxLinux = getAndSanitizeInputs('test-exclude-file-pattern-linux', 'array', [ ]);
+    const testExludeFilePatternsxWindows = getAndSanitizeInputs('test-exclude-file-pattern-windows', 'array', [ ]);
+    const selectedCompiler = getAndSanitizeInputs('the-matrix-compiler-internal-use-only', 'string', "");
+    const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
+    const selectedArch = formatArch(selectedCompiler, selectedArchNoFormat);
+    
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs, runCesterRegression))) {
+        return;
+    }
+    var params = {
+        numberOfTestsRan: 0,
+        numberOfFailedTests: 0,
+        numberOfTests: 0,
+        regressionOutput: "",
+        selectedArchNoFormat: selectedArchNoFormat
+    }
+    var yamlParams = {
+        compilerOptsForTests: compilerOptsForTests,
+        cesterOpts: cesterOpts,
+        testFolderRecursive: testFolderRecursive,
+        testFilePatterns: testFilePatterns,
+        testExludeFilePatterns: testExludeFilePatterns,
+        testExludeFilePatternsx86: testExludeFilePatternsx86,
+        testExludeFilePatternsx64: testExludeFilePatternsx64,
+        testExludeFilePatternsxMacOS: testExludeFilePatternsxMacOS,
+        testExludeFilePatternsxLinux: testExludeFilePatternsxLinux,
+        testExludeFilePatternsxWindows: testExludeFilePatternsxWindows,
+        selectedCompiler: selectedCompiler,
+        exoIncludePath: exoIncludePath,
+        selectedArchNoFormat: selectedArchNoFormat,
+        selectedArch: selectedArch
+    }
+    if (runCesterRegression === true && selectedCompiler !== "" && selectedArch !== undefined && (testFolders instanceof Array)) {
+        var i;
+        var j;
+        var k;
+        for (i = 0; i < testFolders.length; i++) {
+            var folder = testFolders[i];
+            if (!fs.existsSync(folder) || !fs.lstatSync(folder).isDirectory()) {
+                core.setFailed("The test folder does not exist: " + folder);
+                break;
+            }
+            try {
+                await iterateFolderAndExecute(folder, params, yamlParams);
+            } catch (error) {
+                console.error("Failed to iterate the test folder: " + folder);
+                core.setFailed(error);
+                break;
+            }
+        }
+        reportProgress(params);
+    }
+}
+
+async function iterateFolderAndExecute(folder, params, yamlParams) {
+    var files = fs.readdirSync(folder);
+    if (!files) {
+      core.setFailed("Could not list the content of test folder: " + folder);
+      reportProgress(params);
+      return;
+    }
+    var j;
+    for (j = 0; j < files.length; ++j) {
+        var file = files[j];
+        var fullPath = path.join(folder, file);
+        if (fs.lstatSync(fullPath).isDirectory()) {
+            if (yamlParams.testFolderRecursive === true) {
+                await iterateFolderAndExecute(fullPath, params, yamlParams);
+            }
+            continue;
+        }
+        if (!matchesInArray(yamlParams.testFilePatterns, file)) {
+            continue;
+        }
+        if (matchesInArray(yamlParams.testExludeFilePatterns, file)) {
+            continue;
+        }
+        if (yamlParams.selectedArchNoFormat == "x86") {
+            if (matchesInArray(yamlParams.testExludeFilePatternsx86, file)) {
+                continue;
+            }
+        }
+        if (yamlParams.selectedArchNoFormat.indexOf("x64") !== -1) {
+            if (matchesInArray(yamlParams.testExludeFilePatternsx64, file)) {
+                continue;
+            }
+        }
+        if (process.platform === "darwin") {
+            if (matchesInArray(yamlParams.testExludeFilePatternsxMacOS, file)) {
+                continue;
+            }
+        } else if (process.platform === "linux") {
+            if (matchesInArray(yamlParams.testExludeFilePatternsxLinux, file)) {
+                continue;
+            }
+        } else if (process.platform.startsWith("win")) {
+            if (matchesInArray(yamlParams.testExludeFilePatternsxWindows, file)) {
+                continue;
+            }
+        }
+        
+        if (matchesInArray(getAndSanitizeInputs(`test-exclude-file-pattern-${yamlParams.selectedCompiler}`, 'array', [ ]), file)) {
+            continue;
+        }
+        
+        var outputName = file.replace(/\.[^/.]+$/, "");
+        var prefix = "./";
+        if (process.platform.startsWith("win")) {
+            outputName += ".exe";
+            prefix = "";
+        }
+        let result = selectCompilerExec(yamlParams, fullPath, outputName);
+        if (!result) {
+            console.log(`The compiler ${yamlParams.selectedCompiler} cannot be used to compile the file ${file}`);
+            continue;
+        }
+        let {
+            compiler, 
+            compilationOption,
+            preCompileCommand
+        } = result;
+        let compilerOptsForTests = getAndSanitizeInputs(`compiler-options-for-tests-${yamlParams.selectedCompiler}`, 'flatten_string', 
+                                                        (yamlParams.selectedCompiler === "msvc" ? " " : ""));
+        if (compilerOptsForTests === "") {
+            compilerOptsForTests = yamlParams.compilerOptsForTests;
+        }
+        params.numberOfTests++;
+        console.log(`
+===============================================================================================================
+${outputName}
+Compiler: ${compiler}
+Compiler Options: ${yamlParams.compilerOptsForTests}
+Runtime Options: ${yamlParams.cesterOpts}
+===============================================================================================================
+        `)
+        var command = `${preCompileCommand} ${compiler} ${yamlParams.selectedArch} ${compilerOptsForTests} ${compilationOption}`;
+        console.log(command);
+        try {
+            var { error, stdout, stderr } = await jsexec(command);
+            console.log(stdout); console.log(stderr); if (error) { throw error; }
+            var { error, stdout, stderr } = await jsexec(`${prefix}${outputName} ${yamlParams.cesterOpts}`);
+            console.log(stdout); console.log(stderr); if (error) { throw error; }
+            params.numberOfTestsRan++;
+            params.regressionOutput += `\nPASSED ${outputName}`;
+            try {
+                var { error, stdout, stderr } = await jsexec(`rm ${outputName}`);
+                console.log(stdout); console.log(stderr); console.log(error);
+            } catch (error) { console.log(error) }
+        } catch (error) {
+            params.numberOfFailedTests++;
+            params.numberOfTestsRan++;
+            params.regressionOutput += `\nFAILED ${outputName}`;
+            console.error("Process Error Code " + (error.code ? error.code : "Unknown"))
+            console.error(!error.stdout ? (!error.stderr ? error : error.stderr) : error.stdout);
+            if ((!error.stdout && !error.stderr) || (error.stdout.toString().indexOf("test") === -1 && 
+                                                     error.stderr.toString().indexOf("test") === -1)) {
+                console.error(error);
+            }
+        }
+    }
+}
+
+/**
+    This might fail to callthe afterAll 
+    function though no case now, but case 
+    is expected in future.
+*/
+function reportProgress(params) {
+    if (params.numberOfTestsRan === params.numberOfTests) {
+        afterAll(params);
+    }
+}
+
+function afterAll(params) {
+    try {
+        const runCesterRegression = getAndSanitizeInputs('run-regression', 'boolean', true);
+        
+        core.setOutput("tests-passed", (params.numberOfFailedTests === 0));
+        core.setOutput("tests-count", params.numberOfTests);
+        core.setOutput("failed-tests-count", params.numberOfFailedTests);
+        core.setOutput("passed-tests-count", params.numberOfTests - params.numberOfFailedTests);    
+        
+        // compilers paths
+        core.setOutput("win32-clang-gcc-folder", "C:\\msys64\\" + ((params.selectedArchNoFormat === "x86") ? "mingw32" : "mingw64") + "\\bin\\");        
+        if (runCesterRegression === true) {
+            var percentagePassed = Math.round((100 * (params.numberOfTests - params.numberOfFailedTests)) / params.numberOfTests);
+            console.log("Regression Result:")
+            console.log(params.regressionOutput);
+            console.log(`${percentagePassed}% tests passed, ${params.numberOfFailedTests} tests failed out of ${params.numberOfTests}`);
+            if (params.numberOfTests !== 0 && params.numberOfFailedTests !== 0) {
+                throw new Error("Regression test fails. Check the log above for details");
+            }
+        }
+
+        // Get the JSON webhook payload for the event that triggered the workflow
+        const payload = JSON.stringify(github.context.payload, undefined, 2)
+        //console.log(`The event payload: ${payload}`);
+    } catch (error) {
+        core.setFailed(error.message);
+    }
+}
+
+function matchesInArray(patternArray, text) {
+    var k;
+    for (k = 0; k < patternArray.length; k++) {
+        var pattern = patternArray[k];
+        //console.log(" <==>" + text + " in " + pattern + " is " + (new RegExp(pattern).test(text)));
+        if (new RegExp(pattern).test(text)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getAndSanitizeInputs(key, type, defaultValue) {
+    var value = core.getInput(key);
+    if (!value || value == "") {
+        return defaultValue;
+    }
+    if (type === "boolean") {
+        return value.toUpperCase() === "TRUE" || value;
+    }
+    if (type === "flatten_string") {
+        return value.split('\n').join(' ');
+    }
+    if (type === "array" && (typeof value == "string")) {
+        return strToArray(value, '\n');
+    }
+    return value;
+}
+
+function strToArray(str, seperator) {
+    return str.split(seperator);
+}
+
+function walkForFilesOnly(dir, extensions, callback) {
+    var files = fs.readdirSync(dir);
+    if (!files) {
+        return callback(`Unable to read the folder '${dir}'`);
+    }
+    for (let file of files) {
+        file = path.resolve(dir, file);
+        if (fs.lstatSync(file).isDirectory()) {
+            walkForFilesOnly(file, extensions, callback);
+        } else {
+            if (extensions) {
+                let found = false;
+                for (let extension of extensions) {
+                    if (file.endsWith(extension)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    continue;
+                }
+            }
+            if (callback) {
+                if (!callback(null, file)) {
+                    break;
+                }
+            }
+        }
+    }
+};
+  
+
+function selectCompilerExec(yamlParams, fullPath, outputName) {
+    let generalOption = `-I. -I${yamlParams.exoIncludePath} ${fullPath} -o ${outputName}`;
+    if (process.platform.startsWith("win")) {
+        var arch = "64";
+        if (yamlParams.selectedArchNoFormat === "x86") {
+            arch = "32";
+        }
+        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
+            if (yamlParams.selectedArchNoFormat === "x86") {
+                return {
+                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                    compilationOption: generalOption,
+                    preCompileCommand: ''
+                };
+
+            } else {
+                return {
+                    compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
+                    compilationOption: generalOption,
+                    preCompileCommand: ''
+                };
+
+            }
+            
+        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
+            return {
+                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+            
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
+            return {
+                compiler: `${exoPath}/tcc-win/tcc/tcc.exe`,
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        } else if (yamlParams.selectedCompiler.startsWith("msvc")) {
+            return {
+                compiler: `cl`,
+                compilationOption: ` /D__BASE_FILE__=\\\"${fullPath}\\\" /I. /I${yamlParams.exoIncludePath} ${fullPath} /Fe${outputName}`,
+                preCompileCommand: `call "${globalParams.msvcVsDevCmd}" -arch=${yamlParams.selectedArchNoFormat} && `
+            };
+
+        }
+
+    } else {
+        if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
+            return {
+                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "g++" : "gcc"),
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        } else if (yamlParams.selectedCompiler.startsWith("clang")) {
+            return {
+                compiler: (fullPath.endsWith('cpp') || fullPath.endsWith('c++') ? "clang++" : "clang"),
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        } else if (yamlParams.selectedCompiler.startsWith("tcc") && fullPath.endsWith('c')) {
+            return {
+                compiler: yamlParams.selectedCompiler,
+                compilationOption: generalOption,
+                preCompileCommand: ''
+            };
+
+        }
+    }
+}
+
+async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs, runCesterRegression) {
+    if (!runCesterRegression) { return true; }
+    if (!supportedCompilers.includes(selectedCompiler)) {
+        core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
+        return false;
+    }
+    if (selectedCompiler === "tcc") {
+        if (process.platform === "linux" && (arch === "x64" || arch === "x86_64")) {
+            var { error, stdout, stderr } = await jsexec('sudo apt-get install -y tcc');
+            console.log(stdout); console.log(stderr); console.log(error);
+            return true;
+
+        } else if (process.platform === "win32") {
+            if (!fs.existsSync(exoPath)){
+                fs.mkdirSync(exoPath, { recursive: true });
+            }
+            if (arch.startsWith("x") && arch.endsWith("64")) {
+                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
+                console.log(stdout); console.log(stderr); console.log(error);
+
+            } else if (arch === "x86" || arch == "i386") {
+                var { error, stdout, stderr } = await jsexec(`powershell -Command "Invoke-WebRequest -uri 'https://download.savannah.nongnu.org/releases/tinycc/tcc-0.9.27-win32-bin.zip' -Method 'GET'  -Outfile '${exoPath}/tcc-win.zip'"`);
+                console.log(stdout); console.log(stderr); console.log(error);
+
+            } else {
+                console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
+                return false;
+            }
+            var { error, stdout, stderr } = await jsexec(`powershell -Command "Expand-Archive '${exoPath}/tcc-win.zip' -DestinationPath '${exoPath}/tcc-win' -Force"`);
+            console.log(stdout); console.log(stderr); console.log(error);
+            return true;
+
+        } else {
+            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
+            return false;
+        }
+    } else if (selectedCompiler === "msvc") {
+        if (process.platform === "win32") {
+            let foundCompiler = false;
+            let year = (actionOs.indexOf("2016") > -1 ? "2016" : "2019");
+            walkForFilesOnly(`C:/Program Files (x86)/Microsoft Visual Studio/${year}/Enterprise/Common7/Tools/`, [".bat"], function (err, file) {
+                if (err) {
+                    return false;
+                }
+                if (file.endsWith("VsDevCmd.bat")) {
+                    globalParams.msvcVsDevCmd = file;
+                    foundCompiler = true;
+                    return false;
+                }
+                return true;
+            });
+            if (!foundCompiler) {
+                core.setFailed(`Unable to configure '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'.`);
+                return false;
+            }
+            return true;
+
+        } else {
+            console.log(`The compiler '${selectedCompiler}' not supported on this platform '${process.platform}:${arch}'`);
+            return false;
+        }
+    }
+    return true;
+}
+
+function formatArch(selectedCompiler, selectedArch) {
+    if (selectedArch.startsWith("x") && selectedArch.endsWith("64")) { //x64 and x86_64 - 64 bits
+        if (selectedCompiler === "msvc") {
+            return "";
+        }
+        return "-m64";
+    } else if (selectedArch === "x86" || selectedArch == "i386") { //x86 - 32 bits
+        if (process.platform === "darwin") { // The i386 architecture is deprecated for macOS
+            return "-m64";
+        }
+        if (selectedCompiler === "msvc") {
+            return "";
+        }
+        return "-m32";
+    } else {
+        return "-march=" + selectedArch;
+    }
+}
+
+function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
+    var command1 = "", command2 = "", command3 = "";
+    const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
+    
+    console.log("Downloading Exotic Libraries...");
+    if (!fs.existsSync(exoIncludePath)){
+        fs.mkdirSync(exoIncludePath, { recursive: true });
+    }
+    if (process.platform === "linux" || process.platform === "darwin") {
+        command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
+        command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
+        command3 = `bash ./exotic-install.sh ${selectedLibs}`;
+        if (process.platform === "linux") {
+            command4 = 'sudo apt-get install gcc-multilib g++-multilib';
+        }
+        
+    } else if (process.platform === "win32") {
+        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
+        
+    } else {
+        console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")
+        callback(false);
+        return;
+    }
+    console.log(command1);
+    exec.exec(command1).then((result) => {
+        if (result === 0) {
+            if (command2 !== "") {
+                console.log(command2);
+                exec.exec(command2).then((result) => {
+                    if (result === 0) {
+                        if (command3 !== "") {
+                            console.log(command3);
+                            exec.exec(command3).then((result) => {
+                                if (result === 0) {
+                                    if (command4 !== "") {
+                                        console.log(command4);
+                                        exec.exec(command4).then((result) => {
+                                            if (result === 0) {
+                                                callback(true);
+                                            } else {
+                                                callback(false);
+                                            }
+                                        }).catch((error) => {
+                                            console.error(error);
+                                            callback(false);
+                                        });
+                                    } else {
+                                        callback(true);
+                                    }
+                                } else {
+                                    callback(false);
+                                }
+                            }).catch((error) => {
+                                console.error(error);
+                                callback(false);
+                            });
+                        } else {
+                            callback(true);
+                        }
+                    } else {
+                        callback(false);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                    callback(false);
+                });
+            } else {
+                callback(true);
+            }
+        } else {
+            callback(false);
+        }
+    }).catch((error) => {
+        console.error(error);
+        callback(false);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;

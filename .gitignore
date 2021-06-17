@@ -1,6 +1,7 @@
 
 node_modules/
 *ci_compiled/
+*.vscode/
 
 *.h
 *.c

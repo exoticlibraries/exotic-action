@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         platform: [x86, x64]
-        compiler: [gnu, clang, tcc, msvc]
+        compiler: [gcc, clang, tcc, msvc]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -123,7 +123,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         platform: [x86, x64]
-        compiler: [gnu, clang]
+        compiler: [gcc, clang]
 #...
 ```
 
@@ -135,10 +135,10 @@ The matrix configuration above will creates 12 jobs
 |  | macosx-latest | ubuntu-latest | windows-latest |
 | ------ | ------ | ------- | ------- |
 | **x86 (6 jobs)** |
-| gnu    |  1      |     2    |    3     |
+| gcc    |  1      |     2    |    3     |
 | clang  |  4      |     5    |    6     |
 | **x64 (6 jobs)** |
-| gnu    |  7      |     8    |    9     |
+| gcc    |  7      |     8    |    9     |
 | clang  |  10      |     11    |    12     |
 
 ## Test Compilation
