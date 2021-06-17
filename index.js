@@ -9,6 +9,7 @@ const path = require('path');
 const homedir = require('os').homedir();
     
 const supportedCompilers = [
+    'gnu',
     'gcc',
     'clang',
     'tcc',
@@ -59,7 +60,7 @@ async function afterDownloadDeps(exoIncludePath) {
     const selectedArchNoFormat = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     const selectedArch = formatArch(selectedCompiler, selectedArchNoFormat);
     
-    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs))) {
+    if (!(await validateAndInstallAlternateCompiler(selectedCompiler, selectedArchNoFormat, actionOs, runCesterRegression))) {
         return;
     }
     var params = {
@@ -393,7 +394,8 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
     }
 }
 
-async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs) {
+async function validateAndInstallAlternateCompiler(selectedCompiler, arch, actionOs, runCesterRegression) {
+    if (!runCesterRegression) { return; }
     if (!supportedCompilers.includes(selectedCompiler)) {
         core.setFailed("Exotic Action does not support the compiler '" + selectedCompiler + "'");
         return false;
