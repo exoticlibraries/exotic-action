@@ -11138,7 +11138,7 @@ function formatArch(selectedCompiler, selectedArch) {
 }
 
 function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
-    var command1 = "", command2 = "", command3 = "";
+    var command1 = "", command2 = "", command3 = "", command4 = "";
     const selectedArch = getAndSanitizeInputs('the-matrix-arch-internal-use-only', 'string', "");
     
     console.log("Downloading Exotic Libraries...");
