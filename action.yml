@@ -87,6 +87,10 @@ inputs:
     required: false
     default: |
         libcester
+        libxtd
+        libcline
+        libmetaref
+        libfio
     
   install-compilers:
     description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'

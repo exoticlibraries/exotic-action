@@ -489,7 +489,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
     if (process.platform === "linux" || process.platform === "darwin") {
         command1 = `curl -s https://exoticlibraries.github.io/magic/install.sh -o exotic-install.sh`
         command2 = `bash ./exotic-install.sh --installfolder=${exoIncludePath} ${selectedLibs}`;
-        command3 = `bash ./exotic-install.sh ${selectedLibs}`;
+        command3 = `sudo bash ./exotic-install.sh ${selectedLibs}`;
         if (process.platform === "linux") {
             command4 = 'sudo apt-get install gcc-multilib g++-multilib';
         }
