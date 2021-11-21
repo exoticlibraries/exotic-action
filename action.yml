@@ -70,6 +70,26 @@ inputs:
     required: false
     default: 
     
+  test-exclude-file-pattern-gnu: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if selected compiler is gnu'
+    required: false
+    default:
+    
+  test-exclude-file-pattern-gcc: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if selected compiler is gcc'
+    required: false
+    default:
+    
+  test-exclude-file-pattern-tcc: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if selected compiler is tcc'
+    required: false
+    default:
+    
+  test-exclude-file-pattern-msvc: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if selected compiler is msvc'
+    required: false
+    default:
+    
   compiler-options-for-tests: 
     description: 'Array of compiler options to add when compiling each test file'
     required: false
@@ -90,7 +110,7 @@ inputs:
         libxtd
         libcline
         libmetaref
-        libfio
+        liblogax
     
   install-compilers:
     description: 'Specify which compiler to install in the environment regardless of the compiler selected in the matrix'
