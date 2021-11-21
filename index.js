@@ -347,7 +347,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             
         } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
-                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                 compilationOption: generalOption,
                 preCompileCommand: ''
             };
@@ -496,7 +496,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         
     } else if (process.platform === "win32") {
         command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
-        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" ${selectedLibs}`;
+        command2 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" ${selectedLibs}`;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")

@@ -14,7 +14,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__nccwpck_require__(2087));
+const os = __importStar(__nccwpck_require__(2037));
 const utils_1 = __nccwpck_require__(4163);
 /**
  * Commands
@@ -112,8 +112,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const command_1 = __nccwpck_require__(9403);
 const file_command_1 = __nccwpck_require__(1704);
 const utils_1 = __nccwpck_require__(4163);
-const os = __importStar(__nccwpck_require__(2087));
-const path = __importStar(__nccwpck_require__(5622));
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
 /**
  * The code to exit an action
  */
@@ -348,8 +348,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__nccwpck_require__(5747));
-const os = __importStar(__nccwpck_require__(2087));
+const fs = __importStar(__nccwpck_require__(7147));
+const os = __importStar(__nccwpck_require__(2037));
 const utils_1 = __nccwpck_require__(4163);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
@@ -467,10 +467,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__nccwpck_require__(2087));
-const events = __importStar(__nccwpck_require__(8614));
-const child = __importStar(__nccwpck_require__(3129));
-const path = __importStar(__nccwpck_require__(5622));
+const os = __importStar(__nccwpck_require__(2037));
+const events = __importStar(__nccwpck_require__(2361));
+const child = __importStar(__nccwpck_require__(2081));
+const path = __importStar(__nccwpck_require__(1017));
 const io = __importStar(__nccwpck_require__(2541));
 const ioUtil = __importStar(__nccwpck_require__(2417));
 /* eslint-disable @typescript-eslint/unbound-method */
@@ -1059,8 +1059,8 @@ class ExecState extends events.EventEmitter {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
-const fs_1 = __nccwpck_require__(5747);
-const os_1 = __nccwpck_require__(2087);
+const fs_1 = __nccwpck_require__(7147);
+const os_1 = __nccwpck_require__(2037);
 class Context {
     /**
      * Hydrate the context from the environment
@@ -1269,9 +1269,9 @@ exports.getOctokitOptions = getOctokitOptions;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const url = __nccwpck_require__(8835);
-const http = __nccwpck_require__(8605);
-const https = __nccwpck_require__(7211);
+const url = __nccwpck_require__(7310);
+const http = __nccwpck_require__(3685);
+const https = __nccwpck_require__(5687);
 const pm = __nccwpck_require__(2851);
 let tunnel;
 var HttpCodes;
@@ -1808,7 +1808,7 @@ exports.HttpClient = HttpClient;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const url = __nccwpck_require__(8835);
+const url = __nccwpck_require__(7310);
 function getProxyUrl(reqUrl) {
     let usingSsl = reqUrl.protocol === 'https:';
     let proxyUrl;
@@ -1884,9 +1884,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const assert_1 = __nccwpck_require__(2357);
-const fs = __nccwpck_require__(5747);
-const path = __nccwpck_require__(5622);
+const assert_1 = __nccwpck_require__(9491);
+const fs = __nccwpck_require__(7147);
+const path = __nccwpck_require__(1017);
 _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 exports.IS_WINDOWS = process.platform === 'win32';
 function exists(fsPath) {
@@ -2085,9 +2085,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const childProcess = __nccwpck_require__(3129);
-const path = __nccwpck_require__(5622);
-const util_1 = __nccwpck_require__(1669);
+const childProcess = __nccwpck_require__(2081);
+const path = __nccwpck_require__(1017);
+const util_1 = __nccwpck_require__(3837);
 const ioUtil = __nccwpck_require__(2417);
 const exec = util_1.promisify(childProcess.exec);
 /**
@@ -4817,7 +4817,7 @@ function removeHook (state, name, method) {
 "use strict";
 
 
-const cp = __nccwpck_require__(3129);
+const cp = __nccwpck_require__(2081);
 const parse = __nccwpck_require__(4989);
 const enoent = __nccwpck_require__(7845);
 
@@ -4931,7 +4931,7 @@ module.exports = {
 "use strict";
 
 
-const path = __nccwpck_require__(5622);
+const path = __nccwpck_require__(1017);
 const niceTry = __nccwpck_require__(9321);
 const resolveCommand = __nccwpck_require__(7745);
 const escape = __nccwpck_require__(4974);
@@ -5117,7 +5117,7 @@ module.exports.argument = escapeArgument;
 "use strict";
 
 
-const fs = __nccwpck_require__(5747);
+const fs = __nccwpck_require__(7147);
 const shebangCommand = __nccwpck_require__(8456);
 
 function readShebang(command) {
@@ -5157,7 +5157,7 @@ module.exports = readShebang;
 "use strict";
 
 
-const path = __nccwpck_require__(5622);
+const path = __nccwpck_require__(1017);
 const which = __nccwpck_require__(9219);
 const pathKey = __nccwpck_require__(1196)();
 
@@ -5340,8 +5340,8 @@ module.exports = eos;
 
 "use strict";
 
-const path = __nccwpck_require__(5622);
-const childProcess = __nccwpck_require__(3129);
+const path = __nccwpck_require__(1017);
+const childProcess = __nccwpck_require__(2081);
 const crossSpawn = __nccwpck_require__(6548);
 const stripEof = __nccwpck_require__(5042);
 const npmRunPath = __nccwpck_require__(2656);
@@ -5711,7 +5711,7 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 // Older verions of Node.js might not have `util.getSystemErrorName()`.
 // In that case, fall back to a deprecated internal.
-const util = __nccwpck_require__(1669);
+const util = __nccwpck_require__(3837);
 
 let uv;
 
@@ -5805,7 +5805,7 @@ module.exports = opts => {
 
 "use strict";
 
-const {PassThrough} = __nccwpck_require__(2413);
+const {PassThrough} = __nccwpck_require__(2781);
 
 module.exports = options => {
 	options = Object.assign({}, options);
@@ -6005,7 +6005,7 @@ isStream.transform = function (stream) {
 /***/ 9380:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var fs = __nccwpck_require__(5747)
+var fs = __nccwpck_require__(7147)
 var core
 if (process.platform === 'win32' || global.TESTING_WINDOWS) {
   core = __nccwpck_require__(8026)
@@ -6072,7 +6072,7 @@ function sync (path, options) {
 module.exports = isexe
 isexe.sync = sync
 
-var fs = __nccwpck_require__(5747)
+var fs = __nccwpck_require__(7147)
 
 function isexe (path, options, cb) {
   fs.stat(path, function (er, stat) {
@@ -6120,7 +6120,7 @@ function checkMode (stat, options) {
 module.exports = isexe
 isexe.sync = sync
 
-var fs = __nccwpck_require__(5747)
+var fs = __nccwpck_require__(7147)
 
 function checkPathExt (path, options) {
   var pathext = options.pathExt !== undefined ?
@@ -6168,7 +6168,7 @@ function sync (path, options) {
 
 "use strict";
 
-const os = __nccwpck_require__(2087);
+const os = __nccwpck_require__(2037);
 
 const nameMap = new Map([
 	[20, ['Big Sur', '11']],
@@ -6202,7 +6202,7 @@ const macosRelease = release => {
 
 module.exports = macosRelease;
 // TODO: remove this in the next major version
-module.exports.default = macosRelease;
+module.exports["default"] = macosRelease;
 
 
 /***/ }),
@@ -6236,11 +6236,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Stream = _interopDefault(__nccwpck_require__(2413));
-var http = _interopDefault(__nccwpck_require__(8605));
-var Url = _interopDefault(__nccwpck_require__(8835));
-var https = _interopDefault(__nccwpck_require__(7211));
-var zlib = _interopDefault(__nccwpck_require__(8761));
+var Stream = _interopDefault(__nccwpck_require__(2781));
+var http = _interopDefault(__nccwpck_require__(3685));
+var Url = _interopDefault(__nccwpck_require__(7310));
+var https = _interopDefault(__nccwpck_require__(5687));
+var zlib = _interopDefault(__nccwpck_require__(9796));
 
 // Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
 
@@ -6391,7 +6391,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = __nccwpck_require__(9217).convert;
+	convert = (__nccwpck_require__(9217).convert);
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -7874,7 +7874,7 @@ fetch.Promise = global.Promise;
 
 module.exports = exports = fetch;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.default = exports;
+exports["default"] = exports;
 exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
@@ -7888,7 +7888,7 @@ exports.FetchError = FetchError;
 
 "use strict";
 
-const path = __nccwpck_require__(5622);
+const path = __nccwpck_require__(1017);
 const pathKey = __nccwpck_require__(1196);
 
 module.exports = opts => {
@@ -7984,7 +7984,7 @@ function onceStrict (fn) {
 
 "use strict";
 
-const os = __nccwpck_require__(2087);
+const os = __nccwpck_require__(2037);
 const macosRelease = __nccwpck_require__(1875);
 const winRelease = __nccwpck_require__(5118);
 
@@ -8082,7 +8082,7 @@ module.exports = opts => {
 
 var once = __nccwpck_require__(1352)
 var eos = __nccwpck_require__(461)
-var fs = __nccwpck_require__(5747) // we only need fs to get the ReadStream and WriteStream prototypes
+var fs = __nccwpck_require__(7147) // we only need fs to get the ReadStream and WriteStream prototypes
 
 var noop = function () {}
 var ancient = /^v?\.0/.test(process.version)
@@ -9699,11 +9699,11 @@ module.exports = /^#!.*/;
 // Note: since nyc uses this module to output coverage, any lines
 // that are in the direct sync flow of nyc's outputCoverage are
 // ignored, since we can never get coverage for them.
-var assert = __nccwpck_require__(2357)
+var assert = __nccwpck_require__(9491)
 var signals = __nccwpck_require__(4810)
 var isWin = /^win/i.test(process.platform)
 
-var EE = __nccwpck_require__(8614)
+var EE = __nccwpck_require__(2361)
 /* istanbul ignore if */
 if (typeof EE !== 'function') {
   EE = EE.EventEmitter
@@ -9960,13 +9960,13 @@ module.exports = __nccwpck_require__(2955);
 "use strict";
 
 
-var net = __nccwpck_require__(1631);
-var tls = __nccwpck_require__(4016);
-var http = __nccwpck_require__(8605);
-var https = __nccwpck_require__(7211);
-var events = __nccwpck_require__(8614);
-var assert = __nccwpck_require__(2357);
-var util = __nccwpck_require__(1669);
+var net = __nccwpck_require__(1808);
+var tls = __nccwpck_require__(4404);
+var http = __nccwpck_require__(3685);
+var https = __nccwpck_require__(5687);
+var events = __nccwpck_require__(2361);
+var assert = __nccwpck_require__(9491);
+var util = __nccwpck_require__(3837);
 
 
 exports.httpOverHttp = httpOverHttp;
@@ -10266,7 +10266,7 @@ var isWindows = process.platform === 'win32' ||
     process.env.OSTYPE === 'cygwin' ||
     process.env.OSTYPE === 'msys'
 
-var path = __nccwpck_require__(5622)
+var path = __nccwpck_require__(1017)
 var COLON = isWindows ? ';' : ':'
 var isexe = __nccwpck_require__(9380)
 
@@ -10403,7 +10403,7 @@ function whichSync (cmd, opt) {
 
 "use strict";
 
-const os = __nccwpck_require__(2087);
+const os = __nccwpck_require__(2037);
 const execa = __nccwpck_require__(3269);
 
 // Reference: https://www.gaijin.at/en/lstwinver.php
@@ -10506,115 +10506,115 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
-/***/ 2357:
+/***/ 9491:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("assert");;
+module.exports = require("assert");
 
 /***/ }),
 
-/***/ 3129:
+/***/ 2081:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("child_process");;
+module.exports = require("child_process");
 
 /***/ }),
 
-/***/ 8614:
+/***/ 2361:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("events");;
+module.exports = require("events");
 
 /***/ }),
 
-/***/ 5747:
+/***/ 7147:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("fs");;
+module.exports = require("fs");
 
 /***/ }),
 
-/***/ 8605:
+/***/ 3685:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("http");;
+module.exports = require("http");
 
 /***/ }),
 
-/***/ 7211:
+/***/ 5687:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("https");;
+module.exports = require("https");
 
 /***/ }),
 
-/***/ 1631:
+/***/ 1808:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("net");;
+module.exports = require("net");
 
 /***/ }),
 
-/***/ 2087:
+/***/ 2037:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("os");;
+module.exports = require("os");
 
 /***/ }),
 
-/***/ 5622:
+/***/ 1017:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("path");;
+module.exports = require("path");
 
 /***/ }),
 
-/***/ 2413:
+/***/ 2781:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("stream");;
+module.exports = require("stream");
 
 /***/ }),
 
-/***/ 4016:
+/***/ 4404:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("tls");;
+module.exports = require("tls");
 
 /***/ }),
 
-/***/ 8835:
+/***/ 7310:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("url");;
+module.exports = require("url");
 
 /***/ }),
 
-/***/ 1669:
+/***/ 3837:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("util");;
+module.exports = require("util");
 
 /***/ }),
 
-/***/ 8761:
+/***/ 9796:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("zlib");;
+module.exports = require("zlib");
 
 /***/ })
 
@@ -10653,7 +10653,9 @@ module.exports = require("zlib");;
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
@@ -10661,11 +10663,11 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(8021);
 const github = __nccwpck_require__(4366);
 const exec = __nccwpck_require__(2272);
-const util = __nccwpck_require__(1669);
-const jsexec = util.promisify(__nccwpck_require__(3129).exec);
-const fs = __nccwpck_require__(5747);
-const path = __nccwpck_require__(5622);
-const homedir = __nccwpck_require__(2087).homedir();
+const util = __nccwpck_require__(3837);
+const jsexec = util.promisify((__nccwpck_require__(2081).exec));
+const fs = __nccwpck_require__(7147);
+const path = __nccwpck_require__(1017);
+const homedir = (__nccwpck_require__(2037).homedir)();
     
 const supportedCompilers = [
     'gnu',
@@ -11006,7 +11008,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             
         } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
-                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                 compilationOption: generalOption,
                 preCompileCommand: ''
             };
@@ -11155,7 +11157,7 @@ function downloadExoticLibraries(selectedLibs, exoIncludePath, callback) {
         
     } else if (process.platform === "win32") {
         command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" --InstallFolder=${exoIncludePath} ${selectedLibs}`;
-        command1 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" ${selectedLibs}`;
+        command2 = `powershell -Command "& $([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://exoticlibraries.github.io/magic/install.ps1')))" ${selectedLibs}`;
         
     } else {
         console.error("Exotic Action is not supported on this platform '" + process.platform + " " + selectedArch + "'")

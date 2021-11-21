@@ -84,6 +84,11 @@ The `with` portion of the workflow can be configured before the action will work
 | `test-exclude-file-pattern-macos` | List of multiline regex strings to match files to skip on MacOS when searching for test files in the test folders. | Multiline Regex | No |
 | `test-exclude-file-pattern-linux` | List of multiline regex strings to match files to skip on linux os when searching for test files in the test folders. | Multiline Regex | No |
 | `test-exclude-file-pattern-windows` | List of multiline regex strings to match files to skip on windows os when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-gnu` | List of multiline regex strings to match files to skip if the compiler is gnu when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-gcc` | List of multiline regex strings to match files to skip if the compiler is gcc when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-clang` | List of multiline regex strings to match files to skip if the compiler is clang when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-tcc` | List of multiline regex strings to match files to skip if the compiler is tcc when searching for test files in the test folders. | Multiline Regex | No |
+| `test-exclude-file-pattern-msvc` | List of multiline regex strings to match files to skip if the compiler is msvc when searching for test files in the test folders. | Multiline Regex | No |
 | `compiler-options-for-tests` | The multiline string of flags to pass to the compiler when compiling the test files. | Multiline String | No |
 | `regression-cli-options` | The multiline string of flags to pass to the compiled executable when running it. | Multiline String | No |
 | `selected-exotic-libraries` | The selected list of exotic libraries to install, if skipped only libcester is installed. | Multiline String | No |
@@ -264,6 +269,7 @@ To install ncc and build the distributable dit/index.js file. Never commit the n
 
 ```
 npm i -g @vercel/ncc
+npm install
 ncc build index.js
 ```
 
