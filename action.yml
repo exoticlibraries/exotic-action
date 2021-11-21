@@ -80,6 +80,11 @@ inputs:
     required: false
     default:
     
+  test-exclude-file-pattern-clang: 
+    description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if selected compiler is clang'
+    required: false
+    default:
+    
   test-exclude-file-pattern-tcc: 
     description: 'A regex pattern to match the file to exclude from execution in each of the provided test folder if selected compiler is tcc'
     required: false
