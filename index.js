@@ -347,7 +347,7 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             
         } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
-                compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                 compilationOption: generalOption,
                 preCompileCommand: ''
             };
