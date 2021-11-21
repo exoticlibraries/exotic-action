@@ -264,6 +264,7 @@ To install ncc and build the distributable dit/index.js file. Never commit the n
 
 ```
 npm i -g @vercel/ncc
+npm install
 ncc build index.js
 ```
 
