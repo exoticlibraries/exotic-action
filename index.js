@@ -329,21 +329,21 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
             arch = "32";
         }
         if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
-            if (yamlParams.selectedArchNoFormat === "x86") {
+            /*if (yamlParams.selectedArchNoFormat === "x86") {
                 return {
                     compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                     compilationOption: generalOption,
                     preCompileCommand: ''
                 };
 
-            } else {
+            } else {*/
                 return {
                     compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "g++.exe" : "gcc.exe"),
                     compilationOption: generalOption,
                     preCompileCommand: ''
                 };
 
-            }
+            //}
             
         } else if (yamlParams.selectedCompiler.startsWith("clang")) {
             return {
