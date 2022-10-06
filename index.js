@@ -330,8 +330,9 @@ function selectCompilerExec(yamlParams, fullPath, outputName) {
         }
         if (yamlParams.selectedCompiler.startsWith("gnu") || yamlParams.selectedCompiler.startsWith("gcc")) {
             if (yamlParams.selectedArchNoFormat === "x86") {
+                console.log("EXOTIC.ACTION: issue with x86 libraries for gcc, using clang as replacement");
                 return {
-                    compiler: `C:\\msys64\\mingw${arch}\\bin\\` + ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
+                    compiler: ((fullPath.endsWith('cpp') || fullPath.endsWith('c++')) ? "clang++.exe" : "clang.exe"),
                     compilationOption: generalOption,
                     preCompileCommand: ''
                 };
